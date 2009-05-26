@@ -682,6 +682,7 @@ module Vpim
           string = string.unpack('v*').pack('U*')
       end
 
+      string.force_encoding(Encoding::UTF_8)
       entities = Vpim.expand(Vpim.decode(string))
 
       # Since all vCards must have a begin/end, the top-level should consist

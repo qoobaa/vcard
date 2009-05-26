@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{vcard}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Kuźma"]
@@ -12,7 +12,6 @@ Gem::Specification.new do |s|
     "LICENSE",
      "README.rdoc"
   ]
-
   s.files = [
     ".document",
      ".gitignore",
@@ -29,7 +28,8 @@ Gem::Specification.new do |s|
      "lib/vcard/vcard.rb",
      "test/field_test.rb",
      "test/test_helper.rb",
-     "test/vcard_test.rb"
+     "test/vcard_test.rb",
+     "vcard.gemspec"
   ]
   s.homepage = %q{http://github.com/qoobaa/vcard}
   s.rdoc_options = ["--charset=UTF-8"]
