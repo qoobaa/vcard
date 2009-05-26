@@ -7,8 +7,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "vcard"
-    gem.summary = %Q{TODO}
-    gem.email = "kuba@synergypeople.net"
+    gem.summary = %Q{Vcard support extracted from Vpim (Ruby 1.9.1 compatible)}
+    gem.email = "qoobaa@gmail.com"
     gem.homepage = "http://github.com/qoobaa/vcard"
     gem.authors = ["Jakub Kuźma"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
