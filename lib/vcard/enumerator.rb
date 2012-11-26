@@ -2,7 +2,7 @@
 
 # This library is free software; you can redistribute it and/or modify
 # it under the same terms as the ruby language itself, see the file
-# LICENSE-VPIM.txt for details.
+# VPIM-LICENSE.txt for details.
 
 module Vcard
   # This is a way for an object to have multiple ways of being enumerated via
