@@ -1,15 +1,13 @@
-=begin
-  Copyright (C) 2008 Sam Roberts
+# Copyright (C) 2008 Sam Roberts
 
-  This library is free software; you can redistribute it and/or modify it
-  under the same terms as the ruby language itself, see the file COPYING for
-  details.
-=end
+# This library is free software; you can redistribute it and/or modify it
+# under the same terms as the ruby language itself, see the file COPYING for
+# details.
 
-require 'open-uri'
-require 'stringio'
+require "open-uri"
+require "stringio"
 
-module Vpim
+module Vcard
   # A vCard, a specialization of a directory info object.
   #
   # The vCard format is specified by:
@@ -118,7 +116,7 @@ module Vpim
         # TODO - Add #label to support LABEL. Try to find LABEL
         # in either same group, or with sam params.
         @@adr_parts.each do |part|
-          instance_variable_set(part, '')
+          instance_variable_set(part, "")
         end
 
         @location = []
@@ -132,39 +130,39 @@ module Vpim
           instance_variable_get(part)
         end
 
-        value = Vpim.encode_text_list(parts, ";")
+        value = ::Vcard.encode_text_list(parts, ";")
 
         params = [ @location, @delivery, @nonstandard ]
-        params << 'pref' if @preferred
+        params << "pref" if @preferred
         params = params.flatten.compact.map { |s| s.to_str.downcase }.uniq
 
         paramshash = {}
 
-        paramshash['TYPE'] = params if params.first
+        paramshash["TYPE"] = params if params.first
 
-        Vpim::DirectoryInfo::Field.create( 'ADR', value, paramshash)
+        ::Vcard::DirectoryInfo::Field.create( "ADR", value, paramshash)
       end
 
       def Address.decode(card, field) #:nodoc:
         adr = new
 
-        parts = Vpim.decode_text_list(field.value_raw, ';')
+        parts = ::Vcard.decode_text_list(field.value_raw, ";")
 
         @@adr_parts.each_with_index do |part,i|
-          adr.instance_variable_set(part, parts[i] || '')
+          adr.instance_variable_set(part, parts[i] || "")
         end
 
-        params = field.pvalues('TYPE')
+        params = field.pvalues("TYPE")
 
         if params
           params.each do |p|
             p.downcase!
             case p
-            when 'home', 'work'
+            when "home", "work"
               adr.location << p
-            when 'postal', 'parcel', 'dom', 'intl'
+            when "postal", "parcel", "dom", "intl"
               adr.delivery << p
-            when 'pref'
+            when "pref"
               adr.preferred = true
             else
               adr.nonstandard << p
@@ -185,7 +183,7 @@ module Vpim
       # true, false (boolean): whether this is the preferred email address
       attr_accessor :preferred
       # internet, x400 (String): the email address format, rarely specified
-      # since the default is 'internet'
+      # since the default is "internet"
       attr_accessor :format
       # home, work (Array of String): the location referred to by the address. The
       # inclusion of location parameters in a vCard seems to be non-conformant,
@@ -195,9 +193,9 @@ module Vpim
       # might be found during decoding, but shouldn't be set during encoding.
       attr_reader :nonstandard
 
-      def initialize(email='') #:nodoc:
+      def initialize(email="") #:nodoc:
         @preferred = false
-        @format = 'internet'
+        @format = "internet"
         @location = []
         @nonstandard = []
         super(email)
@@ -206,7 +204,7 @@ module Vpim
       def inspect #:nodoc:
         s = "#<#{self.class.to_s}: #{to_str.inspect}"
         s << ", pref" if preferred
-        s << ", #{format}" if format != 'internet'
+        s << ", #{format}" if format != "internet"
         s << ", " << @location.join(", ") if @location.first
         s << ", #{@nonstandard.join(", ")}" if @nonstandard.first
         s
@@ -220,16 +218,16 @@ module Vpim
         end
 
         params = [ @location, @nonstandard ]
-        params << @format if @format != 'internet'
-        params << 'pref'  if @preferred
+        params << @format if @format != "internet"
+        params << "pref"  if @preferred
 
         params = params.flatten.compact.map { |s| s.to_str.downcase }.uniq
 
         paramshash = {}
 
-        paramshash['TYPE'] = params if params.first
+        paramshash["TYPE"] = params if params.first
 
-        Vpim::DirectoryInfo::Field.create( 'EMAIL', value, paramshash)
+        ::Vcard::DirectoryInfo::Field.create("EMAIL", value, paramshash)
       end
 
       def Email.decode(field) #:nodoc:
@@ -241,17 +239,17 @@ module Vpim
 
         eml = Email.new(value)
 
-        params = field.pvalues('TYPE')
+        params = field.pvalues("TYPE")
 
         if params
           params.each do |p|
             p.downcase!
             case p
-            when 'home', 'work'
+            when "home", "work"
               eml.location << p
-            when 'pref'
+            when "pref"
               eml.preferred = true
-            when 'x400', 'internet'
+            when "x400", "internet"
               eml.format = p
             else
               eml.nonstandard << p
@@ -285,7 +283,7 @@ module Vpim
       # might be found during decoding, but shouldn't be set during encoding.
       attr_reader :nonstandard
 
-      def initialize(telephone='') #:nodoc:
+      def initialize(telephone="") #:nodoc:
         @preferred = false
         @location = []
         @capability = []
@@ -310,15 +308,15 @@ module Vpim
         end
 
         params = [ @location, @capability, @nonstandard ]
-        params << 'pref'  if @preferred
+        params << "pref"  if @preferred
 
         params = params.flatten.compact.map { |s| s.to_str.downcase }.uniq
 
         paramshash = {}
 
-        paramshash['TYPE'] = params if params.first
+        paramshash["TYPE"] = params if params.first
 
-        Vpim::DirectoryInfo::Field.create( 'TEL', value, paramshash)
+        ::Vcard::DirectoryInfo::Field.create( "TEL", value, paramshash)
       end
 
       def Telephone.decode(field) #:nodoc:
@@ -330,17 +328,17 @@ module Vpim
 
         tel = Telephone.new(value)
 
-        params = field.pvalues('TYPE')
+        params = field.pvalues("TYPE")
 
         if params
           params.each do |p|
             p.downcase!
             case p
-            when 'home', 'work', 'cell', 'car', 'pager'
+            when "home", "work", "cell", "car", "pager"
               tel.location << p
-            when 'voice', 'fax', 'video', 'msg', 'bbs', 'modem', 'isdn', 'pcs'
+            when "voice", "fax", "video", "msg", "bbs", "modem", "isdn", "pcs"
               tel.capability << p
-            when 'pref'
+            when "pref"
               tel.preferred = true
             else
               tel.nonstandard << p
@@ -379,15 +377,15 @@ module Vpim
       # Override the attr reader to make it dynamic
       remove_method :formatted
       def formatted #:nodoc:
-        f = [ @prefix, @given, @additional, @family ].map{|i| i == '' ? nil : i.strip}.compact.join(' ')
-        if @suffix != ''
-          f << ', ' << @suffix
+        f = [ @prefix, @given, @additional, @family ].map{|i| i == "" ? nil : i.strip}.compact.join(" ")
+        if @suffix != ""
+          f << ", " << @suffix
         end
         f
       end
 
-      def initialize(n='', fn='') #:nodoc:
-        n = Vpim.decode_text_list(n, ';') do |item|
+      def initialize(n="", fn="") #:nodoc:
+        n = ::Vcard.decode_text_list(n, ";") do |item|
           item.strip
         end
 
@@ -402,18 +400,16 @@ module Vpim
       end
 
       def encode #:nodoc:
-         Vpim::DirectoryInfo::Field.create('N',
-           Vpim.encode_text_list([ @family, @given, @additional, @prefix, @suffix ].map{|n| n.strip}, ';')
-           )
+        ::Vcard::DirectoryInfo::Field.create("N", ::Vcard.encode_text_list([ @family, @given, @additional, @prefix, @suffix ].map{|n| n.strip}, ";"))
       end
+
       def encode_fn #:nodoc:
         fn = @fullname.strip
         if @fullname.length == 0
           fn = formatted
         end
-        Vpim::DirectoryInfo::Field.create('FN', fn)
+        ::Vcard::DirectoryInfo::Field.create("FN", fn)
       end
-
     end
 
     def decode_invisible(field) #:nodoc:
@@ -429,19 +425,19 @@ module Vpim
     end
 
     def decode_text(field) #:nodoc:
-      Line.new( field.group, field.name, Vpim.decode_text(field.value_raw) )
+      Line.new( field.group, field.name, ::Vcard.decode_text(field.value_raw) )
     end
 
     def decode_n(field) #:nodoc:
-      Line.new( field.group, field.name, Name.new(field.value, self['FN']).freeze )
+      Line.new( field.group, field.name, Name.new(field.value, self["FN"]).freeze )
     end
 
     def decode_date_or_datetime(field) #:nodoc:
       date = nil
       begin
-        date = Vpim.decode_date_to_date(field.value_raw)
-      rescue Vpim::InvalidEncodingError
-        date = Vpim.decode_date_time_to_datetime(field.value_raw)
+        date = ::Vcard.decode_date_to_date(field.value_raw)
+      rescue ::Vcard::InvalidEncodingError
+        date = ::Vcard.decode_date_time_to_datetime(field.value_raw)
       end
       Line.new( field.group, field.name, date )
     end
@@ -450,7 +446,7 @@ module Vpim
       begin
         return decode_date_or_datetime(field)
 
-      rescue Vpim::InvalidEncodingError
+      rescue ::Vcard::InvalidEncodingError
         # Hack around BDAY dates hat are correct in the month and day, but have
         # some kind of garbage in the year.
         if field.value =~ /^\s*(\d+)-(\d+)-(\d+)\s*$/
@@ -468,7 +464,7 @@ module Vpim
     end
 
     def decode_geo(field) #:nodoc:
-      geo = Vpim.decode_list(field.value_raw, ';') do |item| item.to_f end
+      geo = ::Vcard.decode_list(field.value_raw, ";") do |item| item.to_f end
       Line.new( field.group, field.name, geo )
     end
 
@@ -485,13 +481,11 @@ module Vpim
     end
 
     def decode_list_of_text(field) #:nodoc:
-      Line.new( field.group, field.name,
-               Vpim.decode_text_list(field.value_raw).select{|t| t.length > 0}.uniq
-              )
+      Line.new(field.group, field.name, ::Vcard.decode_text_list(field.value_raw).select{|t| t.length > 0}.uniq)
     end
 
     def decode_structured_text(field) #:nodoc:
-      Line.new( field.group, field.name, Vpim.decode_text_list(field.value_raw, ';') )
+      Line.new( field.group, field.name, ::Vcard.decode_text_list(field.value_raw, ";") )
     end
 
     def decode_uri(field) #:nodoc:
@@ -500,52 +494,52 @@ module Vpim
 
     def decode_agent(field) #:nodoc:
       case field.kind
-      when 'text'
+      when "text"
         decode_text(field)
-      when 'uri'
+      when "uri"
         decode_uri(field)
-      when 'vcard', nil
-        Line.new( field.group, field.name, Vcard.decode(Vpim.decode_text(field.value_raw)).first )
+      when "vcard", nil
+        Line.new( field.group, field.name, ::Vcard.decode(::Vcard.decode_text(field.value_raw)).first )
       else
         raise InvalidEncodingError, "AGENT type #{field.kind} is not allowed"
       end
     end
 
     def decode_attachment(field) #:nodoc:
-      Line.new( field.group, field.name, Attachment.decode(field, 'binary', 'TYPE') )
+      Line.new( field.group, field.name, Attachment.decode(field, "binary", "TYPE") )
     end
 
     @@decode = {
-      'BEGIN'      => :decode_invisible, # Don't return delimiter
-      'END'        => :decode_invisible, # Don't return delimiter
-      'FN'         => :decode_invisible, # Returned as part of N.
+      "BEGIN"      => :decode_invisible, # Don't return delimiter
+      "END"        => :decode_invisible, # Don't return delimiter
+      "FN"         => :decode_invisible, # Returned as part of N.
 
-      'ADR'        => :decode_address,
-      'AGENT'      => :decode_agent,
-      'BDAY'       => :decode_bday,
-      'CATEGORIES' => :decode_list_of_text,
-      'EMAIL'      => :decode_email,
-      'GEO'        => :decode_geo,
-      'KEY'        => :decode_attachment,
-      'LOGO'       => :decode_attachment,
-      'MAILER'     => :decode_text,
-      'N'          => :decode_n,
-      'NAME'       => :decode_text,
-      'NICKNAME'   => :decode_list_of_text,
-      'NOTE'       => :decode_text,
-      'ORG'        => :decode_structured_text,
-      'PHOTO'      => :decode_attachment,
-      'PRODID'     => :decode_text,
-      'PROFILE'    => :decode_text,
-      'REV'        => :decode_date_or_datetime,
-      'ROLE'       => :decode_text,
-      'SOUND'      => :decode_attachment,
-      'SOURCE'     => :decode_text,
-      'TEL'        => :decode_telephone,
-      'TITLE'      => :decode_text,
-      'UID'        => :decode_text,
-      'URL'        => :decode_uri,
-      'VERSION'    => :decode_version,
+      "ADR"        => :decode_address,
+      "AGENT"      => :decode_agent,
+      "BDAY"       => :decode_bday,
+      "CATEGORIES" => :decode_list_of_text,
+      "EMAIL"      => :decode_email,
+      "GEO"        => :decode_geo,
+      "KEY"        => :decode_attachment,
+      "LOGO"       => :decode_attachment,
+      "MAILER"     => :decode_text,
+      "N"          => :decode_n,
+      "NAME"       => :decode_text,
+      "NICKNAME"   => :decode_list_of_text,
+      "NOTE"       => :decode_text,
+      "ORG"        => :decode_structured_text,
+      "PHOTO"      => :decode_attachment,
+      "PRODID"     => :decode_text,
+      "PROFILE"    => :decode_text,
+      "REV"        => :decode_date_or_datetime,
+      "ROLE"       => :decode_text,
+      "SOUND"      => :decode_attachment,
+      "SOURCE"     => :decode_text,
+      "TEL"        => :decode_telephone,
+      "TITLE"      => :decode_text,
+      "UID"        => :decode_text,
+      "URL"        => :decode_uri,
+      "VERSION"    => :decode_version,
     }
 
     @@decode.default = :decode_default
@@ -567,7 +561,7 @@ module Vpim
       attr_reader :value
 
       def initialize(group, name, value) #:nodoc:
-        @group, @name, @value = (group||''), name.to_str, value
+        @group, @name, @value = (group||""), name.to_str, value
       end
 
       def self.decode(decode, card, field) #:nodoc:
@@ -598,7 +592,7 @@ module Vpim
       unless block_given?
         map do |f|
           if( !name || f.name?(name) )
-           f2l(f)
+            f2l(f)
           else
             nil
           end
@@ -625,9 +619,9 @@ module Vpim
 
     # Create a vCard 3.0 object with the minimum required fields, plus any
     # +fields+ you want in the card (they can also be added later).
-    def Vcard.create(fields = [] )
-      fields.unshift Field.create('VERSION', "3.0")
-      super(fields, 'VCARD')
+    def self.create(fields = [] )
+      fields.unshift Field.create("VERSION", "3.0")
+      super(fields, "VCARD")
     end
 
     # Decode a collection of vCards into an array of Vcard objects.
@@ -646,8 +640,8 @@ module Vpim
     #   is converted to UTF-8
     # - 0xFF 0xFE: UTF-16 with a BOM (little-endian), the BOM is stripped and string
     #   is converted to UTF-8
-    # - 0x00 'B' or 0x00 'b': UTF-16 (big-endian), the string is converted to UTF-8
-    # - 'B' 0x00 or 'b' 0x00: UTF-16 (little-endian), the string is converted to UTF-8
+    # - 0x00 "B" or 0x00 "b": UTF-16 (big-endian), the string is converted to UTF-8
+    # - "B" 0x00 or "b" 0x00: UTF-16 (little-endian), the string is converted to UTF-8
     #
     # If you know that you have only one vCard, then you can decode that
     # single vCard by doing something like:
@@ -656,7 +650,7 @@ module Vpim
     #
     # Note: Should the import encoding be remembered, so that it can be reencoded in
     # the same format?
-    def Vcard.decode(card)
+    def self.decode(card)
       if card.respond_to? :to_str
         string = card.to_str
       elsif card.respond_to? :read
@@ -666,7 +660,7 @@ module Vpim
       end
 
       string.force_encoding(Encoding::UTF_8)
-      entities = Vpim.expand(Vpim.decode(string))
+      entities = ::Vcard.expand(::Vcard.decode(string))
 
       # Since all vCards must have a begin/end, the top-level should consist
       # entirely of entities/arrays, even if its a single vCard.
@@ -677,7 +671,7 @@ module Vpim
       vcards = []
 
       for e in entities
-        vcards.push(new(e.flatten, 'VCARD'))
+        vcards.push(new(e.flatten, "VCARD"))
       end
 
       vcards
@@ -685,14 +679,14 @@ module Vpim
 
     # The value of the field named +name+, optionally limited to fields of
     # type +type+. If no match is found, nil is returned, if multiple matches
-    # are found, the first match to have one of its type values be 'PREF'
+    # are found, the first match to have one of its type values be "PREF"
     # (preferred) is returned, otherwise the first match is returned.
     #
     # FIXME - this will become an alias for #value.
     def [](name, type=nil)
       fields = enum_by_name(name).find_all { |f| type == nil || f.type?(type) }
 
-      valued = fields.select { |f| f.value != '' }
+      valued = fields.select { |f| f.value != "" }
       if valued.first
         fields = valued
       end
@@ -715,7 +709,7 @@ module Vpim
     #
     # If multiple lines exist, the order of preference is:
     # - lines with values over lines without
-    # - lines with a type of 'pref' over lines without
+    # - lines with a type of "pref" over lines without
     # If multiple lines are equally preferred, then the first line will be
     # returned.
     #
@@ -727,18 +721,16 @@ module Vpim
     # Note that the +type+ field parameter is used for different purposes by
     # the various kinds of vCard lines, but for the addressing lines (ADR,
     # LABEL, TEL, EMAIL) it is has a reasonably consistent usage. Each
-    # addressing line can occur multiple times, and a +type+ of 'pref'
+    # addressing line can occur multiple times, and a +type+ of "pref"
     # indicates that a particular line is the preferred line. Other +type+
-    # values tend to indicate some information about the location ('home',
-    # 'work', ...) or some detail about the address ('cell', 'fax', 'voice',
+    # values tend to indicate some information about the location ("home",
+    # "work", ...) or some detail about the address ("cell", "fax", "voice",
     # ...). See the methods for the specific types of line for information
     # about supported types and their meaning.
     def value(name, type = nil)
-      v = nil
-
       fields = enum_by_name(name).find_all { |f| type == nil || f.type?(type) }
 
-      valued = fields.select { |f| f.value != '' }
+      valued = fields.select { |f| f.value != "" }
       if valued.first
         fields = valued
       end
@@ -752,7 +744,7 @@ module Vpim
       if fields.first
         line = begin
                  Line.decode(@@decode, self, fields.first)
-               rescue Vpim::InvalidEncodingError
+               rescue ::Vcard::InvalidEncodingError
                end
 
         if line
@@ -775,22 +767,22 @@ module Vpim
 
     # The first ADR value of type +type+, a Address. Any of the location or
     # delivery attributes of Address can be used as +type+. A wrapper around
-    # #value('ADR', +type+).
+    # #value("ADR", +type+).
     def address(type=nil)
-      value('ADR', type)
+      value("ADR", type)
     end
 
     # The ADR values, an array of Address. If a block is given, the values are
-    # yielded. A wrapper around #values('ADR').
+    # yielded. A wrapper around #values("ADR").
     def addresses #:yield:address
-      values('ADR')
+      values("ADR")
     end
 
     # The AGENT values. Each AGENT value is either a String, a Uri, or a Vcard.
     # If a block is given, the values are yielded. A wrapper around
-    # #values('AGENT').
+    # #values("AGENT").
     def agents #:yield:agent
-      values('AGENT')
+      values("AGENT")
     end
 
     # The BDAY value as either a Date or a DateTime, or nil if there is none.
@@ -798,38 +790,38 @@ module Vpim
     # If the BDAY value is invalidly formatted, a feeble heuristic is applied
     # to find the month and year, and return a Date in the current year.
     def birthday
-      value('BDAY')
+      value("BDAY")
     end
 
     # The CATEGORIES values, an array of String. A wrapper around
-    # #value('CATEGORIES').
+    # #value("CATEGORIES").
     def categories
-      value('CATEGORIES')
+      value("CATEGORIES")
     end
 
     # The first EMAIL value of type +type+, a Email. Any of the location
     # attributes of Email can be used as +type+. A wrapper around
-    # #value('EMAIL', +type+).
+    # #value("EMAIL", +type+).
     def email(type=nil)
-      value('EMAIL', type)
+      value("EMAIL", type)
     end
 
     # The EMAIL values, an array of Email. If a block is given, the values are
-    # yielded. A wrapper around #values('EMAIL').
+    # yielded. A wrapper around #values("EMAIL").
     def emails #:yield:email
-      values('EMAIL')
+      values("EMAIL")
     end
 
     # The GEO value, an Array of two Floats, +[ latitude, longitude]+.  North
     # of the equator is positive latitude, east of the meridian is positive
     # longitude.  See RFC2445 for more info, there are lots of special cases
-    # and RFC2445's description is more complete thant RFC2426.
+    # and RFC2445"s description is more complete thant RFC2426.
     def geo
-      value('GEO')
+      value("GEO")
     end
 
     # Return an Array of KEY Line#value, or yield each Line#value if a block
-    # is given. A wrapper around #values('KEY').
+    # is given. A wrapper around #values("KEY").
     #
     # KEY is a public key or authentication certificate associated with the
     # object that the vCard represents. It is not commonly used, but could
@@ -837,11 +829,11 @@ module Vpim
     #
     # See Attachment for a description of the value.
     def keys(&proc) #:yield: Line.value
-      values('KEY', &proc)
+      values("KEY", &proc)
     end
 
     # Return an Array of LOGO Line#value, or yield each Line#value if a block
-    # is given. A wrapper around #values('LOGO').
+    # is given. A wrapper around #values("LOGO").
     #
     # LOGO is a graphic image of a logo associated with the object the vCard
     # represents. Its not common, but would probably be equivalent to the logo
@@ -849,7 +841,7 @@ module Vpim
     #
     # See Attachment for a description of the value.
     def logos(&proc) #:yield: Line.value
-      values('LOGO', &proc)
+      values("LOGO", &proc)
     end
 
     ## MAILER
@@ -859,35 +851,35 @@ module Vpim
     # N is required for a vCards, this raises InvalidEncodingError if
     # there is no N so it cannot return nil.
     def name
-      value('N') || raise(Vpim::InvalidEncodingError, "Missing mandatory N field")
+      value("N") || raise(::Vcard::InvalidEncodingError, "Missing mandatory N field")
     end
 
     # The first NICKNAME value, nil if there are none.
     def nickname
-      v = value('NICKNAME')
+      v = value("NICKNAME")
       v = v.first if v
       v
     end
 
     # The NICKNAME values, an array of String. The array may be empty.
     def nicknames
-      values('NICKNAME').flatten.uniq
+      values("NICKNAME").flatten.uniq
     end
 
-    # The NOTE value, a String. A wrapper around #value('NOTE').
+    # The NOTE value, a String. A wrapper around #value("NOTE").
     def note
-      value('NOTE')
+      value("NOTE")
     end
 
     # The ORG value, an Array of String. The first string is the organization,
     # subsequent strings are departments within the organization. A wrapper
-    # around #value('ORG').
+    # around #value("ORG").
     def org
-      value('ORG')
+      value("ORG")
     end
 
     # Return an Array of PHOTO Line#value, or yield each Line#value if a block
-    # is given. A wrapper around #values('PHOTO').
+    # is given. A wrapper around #values("PHOTO").
     #
     # PHOTO is an image or photograph information that annotates some aspect of
     # the object the vCard represents. Commonly there is one PHOTO, and it is a
@@ -895,7 +887,7 @@ module Vpim
     #
     # See Attachment for a description of the value.
     def photos(&proc) #:yield: Line.value
-      values('PHOTO', &proc)
+      values("PHOTO", &proc)
     end
 
     ## PRODID
@@ -907,7 +899,7 @@ module Vpim
     ## ROLE
 
     # Return an Array of SOUND Line#value, or yield each Line#value if a block
-    # is given. A wrapper around #values('SOUND').
+    # is given. A wrapper around #values("SOUND").
     #
     # SOUND is digital sound content information that annotates some aspect of
     # the vCard. By default this type is used to specify the proper
@@ -917,41 +909,41 @@ module Vpim
     #
     # See Attachment for a description of the value.
     def sounds(&proc) #:yield: Line.value
-      values('SOUND', &proc)
+      values("SOUND", &proc)
     end
 
     ## SOURCE
 
     # The first TEL value of type +type+, a Telephone. Any of the location or
     # capability attributes of Telephone can be used as +type+. A wrapper around
-    # #value('TEL', +type+).
+    # #value("TEL", +type+).
     def telephone(type=nil)
-      value('TEL', type)
+      value("TEL", type)
     end
 
     # The TEL values, an array of Telephone. If a block is given, the values are
-    # yielded. A wrapper around #values('TEL').
+    # yielded. A wrapper around #values("TEL").
     def telephones #:yield:tel
-      values('TEL')
+      values("TEL")
     end
 
     # The TITLE value, a text string specifying the job title, functional
     # position, or function of the object the card represents. A wrapper around
-    # #value('TITLE').
+    # #value("TITLE").
     def title
-      value('TITLE')
+      value("TITLE")
     end
 
     ## UID
 
-    # The URL value, a Attachment::Uri. A wrapper around #value('URL').
+    # The URL value, a Attachment::Uri. A wrapper around #value("URL").
     def url
-      value('URL')
+      value("URL")
     end
 
-    # The URL values, an Attachment::Uri. A wrapper around #values('URL').
+    # The URL values, an Attachment::Uri. A wrapper around #values("URL").
     def urls
-      values('URL')
+      values("URL")
     end
 
     # The VERSION multiplied by 10 as an Integer.  For example, a VERSION:2.1
@@ -961,18 +953,18 @@ module Vpim
     # VERSION is required for a vCard, this raises InvalidEncodingError if
     # there is no VERSION so it cannot return nil.
     def version
-      v = value('VERSION')
+      v = value("VERSION")
       unless v
-        raise Vpim::InvalidEncodingError, 'Invalid vCard - it has no version field!'
+        raise ::Vcard::InvalidEncodingError, "Invalid vCard - it has no version field!"
       end
       v
     end
 
     # Make changes to a vCard.
     #
-    # Yields a Vpim::Vcard::Maker that can be used to modify this vCard.
+    # Yields a Vcard::Vcard::Maker that can be used to modify this vCard.
     def make #:yield: maker
-      Vpim::Vcard::Maker.make2(self) do |maker|
+      ::Vcard::Vcard::Maker.make2(self) do |maker|
         yield maker
       end
     end
@@ -988,8 +980,8 @@ module Vpim
           rm << f
 
           # Hack - because we treat N and FN as one field
-          if f.name? 'N'
-            rm << field('FN')
+          if f.name? "N"
+            rm << field("FN")
           end
         end
       end
@@ -1005,7 +997,7 @@ module Vpim
     #
     # It can be used to create completely new vCards using Vcard#make2.
     #
-    # Its is also yielded from Vpim::Vcard#make, in which case it allows a kind
+    # Its is also yielded from Vcard::Vcard#make, in which case it allows a kind
     # of transactional approach to changing vCards, so their values can be
     # validated after any changes have been made.
     #
@@ -1017,10 +1009,10 @@ module Vpim
     class Maker
       # Make a vCard.
       #
-      # Yields +maker+, a Vpim::Vcard::Maker which allows fields to be added to
-      # +card+, and returns +card+, a Vpim::Vcard.
+      # Yields +maker+, a Vcard::Vcard::Maker which allows fields to be added to
+      # +card+, and returns +card+, a Vcard::Vcard.
       #
-      # If +card+ is nil or not provided a new Vpim::Vcard is created and the
+      # If +card+ is nil or not provided a new Vcard::Vcard is created and the
       # fields are added to it.
       #
       # Defaults:
@@ -1030,7 +1022,7 @@ module Vpim
       #   information in N, see Vcard::Name#preformatted for more information.
       # - vCards must have a VERSION field. If one does not exist when your block is
       #   is finished it will be set to 3.0.
-      def self.make2(card = Vpim::Vcard.create, &block) # :yields: maker
+      def self.make2(card = ::Vcard::Vcard.create, &block) # :yields: maker
         new(nil, card).make(&block)
       end
 
@@ -1039,24 +1031,24 @@ module Vpim
       # If set, the FN field will be set to +full_name+. Otherwise, FN will
       # be set from the values in #name.
       def self.make(full_name = nil, &block) # :yields: maker
-        new(full_name, Vpim::Vcard.create).make(&block)
+        new(full_name, ::Vcard::Vcard.create).make(&block)
       end
 
       def make # :nodoc:
         yield self
-        unless @card['N']
-          raise Unencodeable, 'N field is mandatory'
+        unless @card["N"]
+          raise Unencodeable, "N field is mandatory"
         end
-        fn = @card.field('FN')
+        fn = @card.field("FN")
         if fn && fn.value.strip.length == 0
           @card.delete(fn)
           fn = nil
         end
         unless fn
-          @card << Vpim::DirectoryInfo::Field.create('FN', Vpim::Vcard::Name.new(@card['N'], '').formatted)
+          @card << ::Vcard::DirectoryInfo::Field.create("FN", ::Vcard::Vcard::Name.new(@card["N"], "").formatted)
         end
-        unless @card['VERSION']
-          @card << Vpim::DirectoryInfo::Field.create('VERSION', "3.0")
+        unless @card["VERSION"]
+          @card << ::Vcard::DirectoryInfo::Field.create("VERSION", "3.0")
         end
         @card
       end
@@ -1064,9 +1056,9 @@ module Vpim
       private
 
       def initialize(full_name, card) # :nodoc:
-        @card = card || Vpim::Vcard::create
+        @card = card || ::Vcard::Vcard::create
         if full_name
-          @card << Vpim::DirectoryInfo::Field.create('FN', full_name.strip )
+          @card << ::Vcard::DirectoryInfo::Field.create("FN", full_name.strip )
         end
       end
 
@@ -1079,10 +1071,10 @@ module Vpim
       # to set just fullname, or set the other fields to set fullname and the
       # name.
       def fullname=(fullname) #:nodoc: bacwards compat
-        if @card.field('FN')
-          raise Vpim::InvalidEncodingError, "Not allowed to add more than one FN field to a vCard."
+        if @card.field("FN")
+          raise ::Vcard::InvalidEncodingError, "Not allowed to add more than one FN field to a vCard."
         end
-        @card << Vpim::DirectoryInfo::Field.create( 'FN', fullname );
+        @card << ::Vcard::DirectoryInfo::Field.create( "FN", fullname );
       end
 
       # Set the name fields, N and FN.
@@ -1106,17 +1098,15 @@ module Vpim
         x = begin
               @card.name.dup
             rescue
-              Vpim::Vcard::Name.new
+              ::Vcard::Vcard::Name.new
             end
-
-        fn = x.fullname
 
         yield x
 
         x.fullname.strip!
 
         delete_if do |line|
-          line.name == 'N'
+          line.name == "N"
         end
 
         @card << x.encode
@@ -1127,20 +1117,20 @@ module Vpim
 
       alias :add_name :name #:nodoc: backwards compatibility
 
-      # Add an address field, ADR. +address+ is a Vpim::Vcard::Address.
+      # Add an address field, ADR. +address+ is a Vcard::Vcard::Address.
       def add_addr # :yield: address
-        x = Vpim::Vcard::Address.new
+        x = ::Vcard::Vcard::Address.new
         yield x
         @card << x.encode
         self
       end
 
-      # Add a telephone field, TEL. +tel+ is a Vpim::Vcard::Telephone.
+      # Add a telephone field, TEL. +tel+ is a Vcard::Vcard::Telephone.
       #
       # The block is optional, its only necessary if you want to specify
       # the optional attributes.
       def add_tel(number) # :yield: tel
-        x = Vpim::Vcard::Telephone.new(number)
+        x = ::Vcard::Vcard::Telephone.new(number)
         if block_given?
           yield x
         end
@@ -1148,12 +1138,12 @@ module Vpim
         self
       end
 
-      # Add an email field, EMAIL. +email+ is a Vpim::Vcard::Email.
+      # Add an email field, EMAIL. +email+ is a Vcard::Vcard::Email.
       #
       # The block is optional, its only necessary if you want to specify
       # the optional attributes.
       def add_email(email) # :yield: email
-        x = Vpim::Vcard::Email.new(email)
+        x = ::Vcard::Vcard::Email.new(email)
         if block_given?
           yield x
         end
@@ -1165,9 +1155,9 @@ module Vpim
       #
       # It can be set to a single String or an Array of String.
       def nickname=(nickname)
-        delete_if { |l| l.name == 'NICKNAME' }
+        delete_if { |l| l.name == "NICKNAME" }
 
-        @card << Vpim::DirectoryInfo::Field.create( 'NICKNAME', nickname );
+        @card << ::Vcard::DirectoryInfo::Field.create( "NICKNAME", nickname );
       end
 
       # Add a birthday field, BDAY.
@@ -1178,16 +1168,16 @@ module Vpim
       # birthdays.
       def birthday=(birthday)
         if !birthday.respond_to? :month
-          raise ArgumentError, 'birthday must be a date or time object.'
+          raise ArgumentError, "birthday must be a date or time object."
         end
-        delete_if { |l| l.name == 'BDAY' }
-        @card << Vpim::DirectoryInfo::Field.create( 'BDAY', birthday );
+        delete_if { |l| l.name == "BDAY" }
+        @card << ::Vcard::DirectoryInfo::Field.create( "BDAY", birthday );
       end
 
       # Add a note field, NOTE. The +note+ String can contain newlines, they
       # will be escaped.
       def add_note(note)
-        @card << Vpim::DirectoryInfo::Field.create( 'NOTE', Vpim.encode_text(note) );
+        @card << ::Vcard::DirectoryInfo::Field.create( "NOTE", ::Vcard.encode_text(note) );
       end
 
       # Add an instant-messaging/point of presence address field, IMPP. The address
@@ -1224,14 +1214,14 @@ module Vpim
 
           yield x
 
-          x[:preferred] = 'PREF' if x[:preferred]
+          x[:preferred] = "PREF" if x[:preferred]
 
           types = x.to_a.flatten.compact.map { |s| s.downcase }.uniq
 
-          params['TYPE'] = types if types.first
+          params["TYPE"] = types if types.first
         end
 
-        @card << Vpim::DirectoryInfo::Field.create( 'IMPP', url, params)
+        @card << ::Vcard::DirectoryInfo::Field.create( "IMPP", url, params)
         self
       end
 
@@ -1254,14 +1244,14 @@ module Vpim
 
           yield x
 
-          x[:preferred] = 'PREF' if x[:preferred]
+          x[:preferred] = "PREF" if x[:preferred]
 
           types = x.to_a.flatten.compact.map { |s| s.downcase }.uniq
 
-          params['TYPE'] = types if types.first
+          params["TYPE"] = types if types.first
         end
 
-        @card << Vpim::DirectoryInfo::Field.create( 'X-AIM', xaim, params)
+        @card << ::Vcard::DirectoryInfo::Field.create( "X-AIM", xaim, params)
         self
       end
 
@@ -1289,30 +1279,30 @@ module Vpim
         x = Struct.new(:image, :link, :type).new
         yield x
         if x[:image] && x[:link]
-          raise Vpim::InvalidEncodingError, 'Image is not allowed to be both inline and a link.'
+          raise ::Vcard::InvalidEncodingError, "Image is not allowed to be both inline and a link."
         end
 
         value = x[:image] || x[:link]
 
         if !value
-          raise Vpim::InvalidEncodingError, 'A image link or inline data must be provided.'
+          raise ::Vcard::InvalidEncodingError, "A image link or inline data must be provided."
         end
 
         params = {}
 
         # Don't set type to the empty string.
-        params['TYPE'] = x[:type] if( x[:type] && x[:type].length > 0 )
+        params["TYPE"] = x[:type] if( x[:type] && x[:type].length > 0 )
 
         if x[:link]
-          params['VALUE'] = 'URI'
+          params["VALUE"] = "URI"
         else # it's inline, base-64 encode it
-          params['ENCODING'] = :b64
+          params["ENCODING"] = :b64
           if !x[:type]
-            raise Vpim::InvalidEncodingError, 'Inline image data must have it\'s type set.'
+            raise ::Vcard::InvalidEncodingError, "Inline image data must have it's type set."
           end
         end
 
-        @card << Vpim::DirectoryInfo::Field.create( 'PHOTO', value, params )
+        @card << ::Vcard::DirectoryInfo::Field.create( "PHOTO", value, params )
         self
       end
 
@@ -1320,36 +1310,36 @@ module Vpim
       #
       # It can be set to a single String.
       def title=(title)
-        delete_if { |l| l.name == 'TITLE' }
+        delete_if { |l| l.name == "TITLE" }
 
-        @card << Vpim::DirectoryInfo::Field.create( 'TITLE', title );
+        @card << ::Vcard::DirectoryInfo::Field.create( "TITLE", title );
       end
 
       # Set the org field, ORG.
       #
       # It can be set to a single String or an Array of String.
       def org=(org)
-        delete_if { |l| l.name == 'ORG' }
+        delete_if { |l| l.name == "ORG" }
 
-        @card << Vpim::DirectoryInfo::Field.create( 'ORG', org );
+        @card << ::Vcard::DirectoryInfo::Field.create( "ORG", org );
       end
 
 
       # Add a URL field, URL.
       def add_url(url)
-        @card << Vpim::DirectoryInfo::Field.create( 'URL', url.to_str );
+        @card << ::Vcard::DirectoryInfo::Field.create( "URL", url.to_str );
       end
 
       # Add a Field, +field+.
       def add_field(field)
         fieldname = field.name.upcase
         case
-        when [ 'BEGIN', 'END' ].include?(fieldname)
-          raise Vpim::InvalidEncodingError, "Not allowed to manually add #{field.name} to a vCard."
+        when [ "BEGIN", "END" ].include?(fieldname)
+          raise ::Vcard::InvalidEncodingError, "Not allowed to manually add #{field.name} to a vCard."
 
-        when [ 'VERSION', 'N', 'FN' ].include?(fieldname)
+        when [ "VERSION", "N", "FN" ].include?(fieldname)
           if @card.field(fieldname)
-            raise Vpim::InvalidEncodingError, "Not allowed to add more than one #{fieldname} to a vCard."
+            raise ::Vcard::InvalidEncodingError, "Not allowed to add more than one #{fieldname} to a vCard."
           end
           @card << field
 
@@ -1370,10 +1360,10 @@ module Vpim
         card.each do |field|
           fieldname = field.name.upcase
           case
-          when [ 'BEGIN', 'END' ].include?(fieldname)
+          when [ "BEGIN", "END" ].include?(fieldname)
             # Never copy these
 
-          when [ 'VERSION', 'N', 'FN' ].include?(fieldname) && @card.field(fieldname)
+          when [ "VERSION", "N", "FN" ].include?(fieldname) && @card.field(fieldname)
             # Copy these only if they don't already exist.
 
           else
@@ -1391,9 +1381,9 @@ module Vpim
       # Delete +line+ if block yields true.
       def delete_if #:yield: line
         begin
-        @card.delete_if do |line|
-          yield line
-        end
+          @card.delete_if do |line|
+            yield line
+          end
         rescue NoMethodError
           # FIXME - this is a hideous hack, allowing a DirectoryInfo to
           # be passed instead of a Vcard, and for it to almost work. Yuck.

@@ -1,14 +1,4 @@
-require 'test_helper'
-
-include Vpim
-
-# Test equivalence where whitespace is compressed.
-def assert_equal_nospace(expected, got)
-  expected = expected.gsub(/\s+/,'')
-  got = expected.gsub(/\s+/,'')
-  assert_equal(expected, got)
-end
-
+require "test_helper"
 
 # Test cases: multiple occurrences of type
 =begin
@@ -47,7 +37,7 @@ EOF
   def test_ex1
     card = nil
     ex1 = EX1
-    assert_nothing_thrown { card = Vpim::DirectoryInfo.decode(ex1) }
+    assert_nothing_thrown { card = Vcard::DirectoryInfo.decode(ex1) }
     assert_equal_nospace(EX1, card.to_s)
 
     assert_equal("Babs Jensen", card["cn"])
@@ -76,7 +66,7 @@ end:VCARD
   def test_ex2
     card = nil
     ex2 = EX2
-    assert_nothing_thrown { card = Vpim::Vcard.decode(ex2).first }
+    assert_nothing_thrown { card = Vcard::Vcard.decode(ex2).first }
     assert_equal(EX2, card.encode(0))
     assert_raises(InvalidEncodingError) { card.version }
 
@@ -177,7 +167,7 @@ END:VCARD
 EOF
   def test_ex_apple1
     card = nil
-    assert_nothing_thrown { card = Vpim::Vcard.decode(EX_APPLE1).first }
+    assert_nothing_thrown { card = Vcard::Vcard.decode(EX_APPLE1).first }
 
     assert_equal("Roberts Sam", card.name.fullname)
     assert_equal("Roberts",  card.name.family)
@@ -223,12 +213,12 @@ nickname:Bob
 end:vcard
 EOF
   def test_nickname
-    assert_equal(nil,          Vpim::Vcard.decode(NICKNAME0).first.nickname)
-    assert_equal(nil,          Vpim::Vcard.decode(NICKNAME1).first.nickname)
-    assert_equal(nil,          Vpim::Vcard.decode(NICKNAME2).first.nickname)
-    assert_equal('Big Joey',   Vpim::Vcard.decode(NICKNAME3).first.nickname)
-    assert_equal('Big Joey',   Vpim::Vcard.decode(NICKNAME4).first['nickname'])
-    assert_equal(['Big Joey', 'Bob'],   Vpim::Vcard.decode(NICKNAME5).first.nicknames)
+    assert_equal(nil,          Vcard::Vcard.decode(NICKNAME0).first.nickname)
+    assert_equal(nil,          Vcard::Vcard.decode(NICKNAME1).first.nickname)
+    assert_equal(nil,          Vcard::Vcard.decode(NICKNAME2).first.nickname)
+    assert_equal('Big Joey',   Vcard::Vcard.decode(NICKNAME3).first.nickname)
+    assert_equal('Big Joey',   Vcard::Vcard.decode(NICKNAME4).first['nickname'])
+    assert_equal(['Big Joey', 'Bob'],   Vcard::Vcard.decode(NICKNAME5).first.nicknames)
   end
 
 
@@ -254,7 +244,7 @@ EOF
     assert_equal("CATEGORIES: Amis/Famille", card[ "note" ])
   end
 
-  # Test data for Vpim.expand
+  # Test data for Vcard.expand
   EX_EXPAND =<<'EOF'
 BEGIN:a
 a1:
@@ -270,8 +260,8 @@ a2:
 END:a
 EOF
   def test_expand
-    src = Vpim.decode(EX_EXPAND)
-    dst = Vpim.expand(src)
+    src = Vcard.decode(EX_EXPAND)
+    dst = Vcard.expand(src)
 
     assert_equal('a',   dst[0][0].value)
     assert_equal('A1',  dst[0][1].name)
@@ -281,14 +271,14 @@ EOF
     assert_equal('C2',  dst[0][2][1][2].name)
     assert_equal('c',   dst[0][2][1][3].value)
 
-    cards = Vpim::Vcard.decode(EX_APPLE1)
+    cards = Vcard::Vcard.decode(EX_APPLE1)
 
     assert_equal(1, cards.length)
 
     check_ex_apple1(cards[0])
   end
 
-  # An iCalendar for Vpim.expand
+  # An iCalendar for Vcard.expand
   EX_ICAL_1 =<<'EOF'
 BEGIN:VCALENDAR
 CALSCALE:GREGORIAN
@@ -342,8 +332,8 @@ EOF
     src = nil
     dst = nil
     assert_nothing_thrown {
-      src = Vpim.decode(EX_ICAL_1)
-      dst = Vpim.expand(src)
+      src = Vcard.decode(EX_ICAL_1)
+      dst = Vcard.expand(src)
     }
 
     #p dst
@@ -363,7 +353,7 @@ END:vCARD
 EOF
   def _test_cons # FIXME
     card = nil
-    assert_nothing_thrown { card = Vpim::Vcard.decode(TST1).first }
+    assert_nothing_thrown { card = Vcard::Vcard.decode(TST1).first }
     assert_equal(TST1, card.to_s)
     assert_equal('Healey\'s\n\nLook up exact time.\n', card[ "description" ])
 
@@ -390,7 +380,7 @@ EOF
   def test_bad
     # FIXME: this should THROW, it's badly encoded!
     assert_nothing_thrown {
-      Vpim::Vcard.decode(
+      Vcard::Vcard.decode(
       "BEGIN:VCARD\nVERSION:3.0\nKEYencoding=b:this could be \nmy certificate\n\nEND:VCARD\n"
       )
     }
@@ -398,11 +388,11 @@ EOF
 =end
 
   def test_create
-    card = Vpim::Vcard.create
+    card = Vcard::Vcard.create
 
-    key = Vpim::DirectoryInfo.decode("key;type=x509;encoding=B:dGhpcyBjb3VsZCBiZSAKbXkgY2VydGlmaWNhdGUK\n")['key']
+    key = Vcard::DirectoryInfo.decode("key;type=x509;encoding=B:dGhpcyBjb3VsZCBiZSAKbXkgY2VydGlmaWNhdGUK\n")['key']
 
-    card << Vpim::DirectoryInfo::Field.create('key', key, 'encoding' => :b64)
+    card << Vcard::DirectoryInfo::Field.create('key', key, 'encoding' => :b64)
 
     assert_equal(key, card['key'])
 
@@ -412,86 +402,86 @@ EOF
   def test_values
 
     # date
-    assert_equal([2002, 4, 22],       Vpim.decode_date(" 20020422  "))
-    assert_equal([2002, 4, 22],       Vpim.decode_date(" 2002-04-22  "))
-    assert_equal([2002, 4, 22],       Vpim.decode_date(" 2002-04-22 \n"))
+    assert_equal([2002, 4, 22],       Vcard.decode_date(" 20020422  "))
+    assert_equal([2002, 4, 22],       Vcard.decode_date(" 2002-04-22  "))
+    assert_equal([2002, 4, 22],       Vcard.decode_date(" 2002-04-22 \n"))
 
     assert_equal([[2002, 4, 22]],
-      Vpim.decode_date_list(" 2002-04-22 "))
+      Vcard.decode_date_list(" 2002-04-22 "))
 
     assert_equal([[2002, 4, 22],[2002, 4, 22]],
-      Vpim.decode_date_list(" 2002-04-22, 2002-04-22,"))
+      Vcard.decode_date_list(" 2002-04-22, 2002-04-22,"))
 
     assert_equal([[2002, 4, 22],[2002, 4, 22]],
-      Vpim.decode_date_list(" 2002-04-22,,, ,   ,2002-04-22, , \n"))
+      Vcard.decode_date_list(" 2002-04-22,,, ,   ,2002-04-22, , \n"))
 
     assert_equal([],
-      Vpim.decode_date_list("  ,           , "))
+      Vcard.decode_date_list("  ,           , "))
 
     # time
     assert_equal(
        [4, 53, 22, 0, nil],
-       Vpim.decode_time(" 04:53:22 \n")
+       Vcard.decode_time(" 04:53:22 \n")
        )
     assert_equal(
        [4, 53, 22, 0.10, nil],
-       Vpim.decode_time(" 04:53:22.10 \n")
+       Vcard.decode_time(" 04:53:22.10 \n")
        )
     assert_equal(
        [4, 53, 22, 0.10, "Z"],
-       Vpim.decode_time(" 04:53:22.10Z \n")
+       Vcard.decode_time(" 04:53:22.10Z \n")
        )
     assert_equal(
        [4, 53, 22, 0, "Z"],
-       Vpim.decode_time(" 045322Z \n")
+       Vcard.decode_time(" 045322Z \n")
        )
     assert_equal(
        [4, 53, 22, 0, "+0530"],
-       Vpim.decode_time(" 04:5322+0530 \n")
+       Vcard.decode_time(" 04:5322+0530 \n")
        )
     assert_equal(
        [4, 53, 22, 0.10, "Z"],
-       Vpim.decode_time(" 045322.10Z \n")
+       Vcard.decode_time(" 045322.10Z \n")
        )
 
     # date-time
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0, nil],
-       Vpim.decode_date_time("20020422T04:53:22 \n")
+       Vcard.decode_date_time("20020422T04:53:22 \n")
        )
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0.10, nil],
-       Vpim.decode_date_time(" 2002-04-22T04:53:22.10 \n")
+       Vcard.decode_date_time(" 2002-04-22T04:53:22.10 \n")
        )
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0.10, "Z"],
-       Vpim.decode_date_time(" 20020422T04:53:22.10Z \n")
+       Vcard.decode_date_time(" 20020422T04:53:22.10Z \n")
        )
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0, "Z"],
-       Vpim.decode_date_time(" 20020422T045322Z \n")
+       Vcard.decode_date_time(" 20020422T045322Z \n")
        )
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0, "+0530"],
-       Vpim.decode_date_time(" 20020422T04:5322+0530 \n")
+       Vcard.decode_date_time(" 20020422T04:5322+0530 \n")
        )
     assert_equal(
        [2002, 4, 22, 4, 53, 22, 0.10, "Z"],
-       Vpim.decode_date_time(" 20020422T045322.10Z \n")
+       Vcard.decode_date_time(" 20020422T045322.10Z \n")
        )
     assert_equal(
        [2003, 3, 25, 3, 20, 35, 0, "Z"],
-       Vpim.decode_date_time("20030325T032035Z")
+       Vcard.decode_date_time("20030325T032035Z")
        )
 
     # text
     assert_equal(
                         "aa,\n\n,\\,\\a;;b",
-       Vpim.decode_text('aa,\\n\\n,\\\\\,\\\\a\;\;b')
+       Vcard.decode_text('aa,\\n\\n,\\\\\,\\\\a\;\;b')
        )
     assert_equal(
                          ['', "1\n2,3", "bbb", '', "zz", ''],
-       Vpim.decode_text_list(',1\\n2\\,3,bbb,,zz,')
+       Vcard.decode_text_list(',1\\n2\\,3,bbb,,zz,')
        )
   end
 
@@ -509,7 +499,7 @@ END:VCARD
 EOF
 
   def test_create_1
-    card = Vpim::Vcard.create
+    card = Vcard::Vcard.create
 
     card << DirectoryInfo::Field.create('n', 'Roberts;Sam;;;')
     card << DirectoryInfo::Field.create('fn', 'Roberts Sam')
@@ -536,7 +526,7 @@ END:VCARD
 EOF
 
   def test_birthday
-    cards = Vpim::Vcard.decode(EX_BDAYS)
+    cards = Vcard::Vcard.decode(EX_BDAYS)
 
     expected = [
       Date.new(Time.now.year, 12, 15),
@@ -574,7 +564,7 @@ PHOTO;value=uri;type=atype:my://
 END:VCARD
 ---
   def test_attach
-    card = Vpim::Vcard.decode(EX_ATTACH).first
+    card = Vcard::Vcard.decode(EX_ATTACH).first
     card.lines # FIXME - assert values are as expected
   end
 
@@ -597,28 +587,28 @@ UID:pas-id-3F93E22900000001
 END:VCARD
 ---
   def test_v21_modification
-    card0 = Vpim::Vcard.decode(EX_21).first
-    card1 = Vpim::Vcard::Maker.make2(card0) do |maker|
+    card0 = Vcard::Vcard.decode(EX_21).first
+    card1 = Vcard::Vcard::Maker.make2(card0) do |maker|
       maker.nickname = 'nickname'
     end
-    card2 = Vpim::Vcard.decode(card1.encode).first
+    card2 = Vcard::Vcard.decode(card1.encode).first
 
     assert_equal(card0.version, card1.version)
     assert_equal(card0.version, card2.version)
   end
 
   def test_v21_versioned_copy
-    card0 = Vpim::Vcard.decode(EX_21).first
-    card1 = Vpim::Vcard::Maker.make2(Vpim::DirectoryInfo.create([], 'VCARD')) do |maker|
+    card0 = Vcard::Vcard.decode(EX_21).first
+    card1 = Vcard::Vcard::Maker.make2(Vcard::DirectoryInfo.create([], 'VCARD')) do |maker|
       maker.copy card0
     end
-    card2 = Vpim::Vcard.decode(card1.encode).first
+    card2 = Vcard::Vcard.decode(card1.encode).first
 
     assert_equal(card0.version, card2.version)
   end
 
   def test_v21_strip_version
-    card0 = Vpim::Vcard.decode(EX_21).first
+    card0 = Vcard::Vcard.decode(EX_21).first
 
     card0.delete card0.field('VERSION')
     card0.delete card0.field('TEL')
@@ -633,10 +623,10 @@ END:VCARD
       card0.delete card0.field('BEGIN')
     end
 
-    card1 = Vpim::Vcard::Maker.make2(Vpim::DirectoryInfo.create([], 'VCARD')) do |maker|
+    card1 = Vcard::Vcard::Maker.make2(Vcard::DirectoryInfo.create([], 'VCARD')) do |maker|
       maker.copy card0
     end
-    card2 = Vpim::Vcard.decode(card1.encode).first
+    card2 = Vcard::Vcard.decode(card1.encode).first
 
     assert_equal(30,            card2.version)
     assert_equal(nil,           card2.field('TEL'))
@@ -661,7 +651,7 @@ LABEL;CHARSET=ISO-8859-1;ENCODING=QUOTED-PRINTABLE:Box 1234=0AWorkv=E4gen =
 END:VCARD
 ---
   def test_v21_case0
-    card = Vpim::Vcard.decode(EX_21_CASE0).first
+    card = Vcard::Vcard.decode(EX_21_CASE0).first
     # pp card.field('LABEL').value_raw
     # pp card.field('LABEL').value
   end
@@ -715,7 +705,7 @@ END:VCARD
   def test_add_note
     note = "hi\' \  \"\",,;; \n \n field"
 
-    card = Vpim::Vcard::Maker.make2 do |m|
+    card = Vcard::Vcard::Maker.make2 do |m|
       m.add_note(note)
       m.name {}
     end
@@ -730,7 +720,7 @@ TEL;HOME;FAX:
 END:VCARD
 ___
 
-    card = Vpim::Vcard.decode(cin).first
+    card = Vcard::Vcard.decode(cin).first
     assert_equal(card.telephone, nil)
     assert_equal(card.telephone('HOME'), nil)
     assert_equal([], card.telephones)
@@ -744,7 +734,7 @@ X-messaging/xmpp-All:some@jabber.id
 END:VCARD
 ___
 
-    card = Vpim::Vcard.decode(cin).first
+    card = Vcard::Vcard.decode(cin).first
     assert_equal(card.value("X-messaging/xmpp-All"), "some@jabber.id")
     assert_equal(card["X-messaging/xmpp-All"], "some@jabber.id")
   end
@@ -756,7 +746,7 @@ URL:www.email.com
 URL:www.work.com
 END:VCARD
 ---
-    card = Vpim::Vcard.decode(cin).first
+    card = Vcard::Vcard.decode(cin).first
 
     assert_equal("www.email.com", card.url.uri)
     assert_equal("www.email.com", card.url.uri.to_s)
@@ -770,7 +760,7 @@ BEGIN:VCARD
 BDAY:1970-07-14
 END:VCARD
 ---
-    card = Vpim::Vcard.decode(cin).first
+    card = Vcard::Vcard.decode(cin).first
 
     card.birthday
 
@@ -787,7 +777,7 @@ BDAY:1970-07-15T03:45:12
 BDAY:1970-07-15T03:45:12Z
 END:VCARD
 ---
-    card = Vpim::Vcard.decode(cin).first
+    card = Vcard::Vcard.decode(cin).first
 
     assert_equal(Date.new(1970, 7, 14), card.birthday)
     assert_equal(4, card.values("bday").size)
@@ -800,7 +790,7 @@ END:VCARD
   def utf_name_test(c)
 
     begin
-    card = Vpim::Vcard.decode(c).first
+    card = Vcard::Vcard.decode(c).first
     assert_equal("name", card.name.family)
     rescue
       $!.message << " #{c.inspect}"
@@ -880,7 +870,7 @@ FN:John Doe
 END:VCARD
 __
 
-    card = Vpim::Vcard.decode(c).first
+    card = Vcard::Vcard.decode(c).first
     assert_equal("Doe", card.name.family)
     assert_equal("456 Grandview Building, Wide Street", card.address('work').street)
     assert_equal("123 Sweet Home, Narrow Street", card.address('home').street)
@@ -924,13 +914,13 @@ ORG:Stepcase.com
 NOTE:Stepcase test user is a robot.
 END:VCARD
 __
-    card = Vpim::Vcard.decode(c).first
+    card = Vcard::Vcard.decode(c).first
     assert_equal("123 Home, Home Street\r\n Kowloon, N/A\r\n Hong Kong", card.value("label"))
   end
 
   def test_title
     title = "She Who Must Be Obeyed"
-    card = Vpim::Vcard::Maker.make2 do |m|
+    card = Vcard::Vcard::Maker.make2 do |m|
       m.name do |n|
         n.given = "Hilda"
         n.family = "Rumpole"
@@ -938,12 +928,12 @@ __
       m.title = title
     end
     assert_equal(title, card.title)
-    card = Vpim::Vcard.decode(card.encode).first
+    card = Vcard::Vcard.decode(card.encode).first
     assert_equal(title, card.title)
   end
 
   def _test_org(*org)
-    card = Vpim::Vcard::Maker.make2 do |m|
+    card = Vcard::Vcard::Maker.make2 do |m|
       m.name do |n|
         n.given = "Hilda"
         n.family = "Rumpole"
@@ -951,7 +941,7 @@ __
       m.org = org
     end
     assert_equal(org, card.org)
-    card = Vpim::Vcard.decode(card.encode).first
+    card = Vcard::Vcard.decode(card.encode).first
     assert_equal(org, card.org)
   end
 

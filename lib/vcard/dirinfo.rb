@@ -1,12 +1,10 @@
-=begin
-  Copyright (C) 2008 Sam Roberts
+# Copyright (C) 2008 Sam Roberts
 
-  This library is free software; you can redistribute it and/or modify it
-  under the same terms as the ruby language itself, see the file COPYING for
-  details.
-=end
+# This library is free software; you can redistribute it and/or modify it
+# under the same terms as the ruby language itself, see the file COPYING for
+# details.
 
-module Vpim
+module Vcard
   # An RFC 2425 directory info object.
   #
   # A directory information object is a sequence of fields. The basic
@@ -19,13 +17,13 @@ module Vpim
   #
   # Here's an example of encoding a simple vCard using the low-level APIs:
   #
-  #   card = Vpim::Vcard.create
-  #   card << Vpim::DirectoryInfo::Field.create('EMAIL', 'user.name@example.com', 'TYPE' => 'INTERNET' )
-  #   card << Vpim::DirectoryInfo::Field.create('URL', 'http://www.example.com/user' )
-  #   card << Vpim::DirectoryInfo::Field.create('FN', 'User Name' )
+  #   card = Vcard::Vcard.create
+  #   card << Vcard::DirectoryInfo::Field.create("EMAIL", "user.name@example.com", "TYPE" => "INTERNET" )
+  #   card << Vcard::DirectoryInfo::Field.create("URL", "http://www.example.com/user" )
+  #   card << Vcard::DirectoryInfo::Field.create("FN", "User Name" )
   #   puts card.to_s
   #
-  # Don't do it like that, use Vpim::Vcard::Maker.
+  # Don't do it like that, use Vcard::Vcard::Maker.
   class DirectoryInfo
     include Enumerable
 
@@ -35,7 +33,7 @@ module Vpim
     # specified, check the BEGIN/END fields.
     def initialize(fields, profile = nil) #:nodoc:
       if fields.detect { |f| ! f.kind_of? DirectoryInfo::Field }
-        raise ArgumentError, 'fields must be an array of DirectoryInfo::Field objects'
+        raise ArgumentError, "fields must be an array of DirectoryInfo::Field objects"
       end
 
       @string = nil # this is used as a flag to indicate that recoding will be necessary
@@ -53,7 +51,7 @@ module Vpim
     # The lines in the string may be delimited using IETF (CRLF) or Unix (LF) conventions.
     #
     # A DirectoryInfo is mutable, you can add new fields to it, see
-    # Vpim::DirectoryInfo::Field#create() for how to create a new Field.
+    # Vcard::DirectoryInfo::Field#create() for how to create a new Field.
     #
     # TODO: I don't believe this is ever used, maybe I can remove it.
     def DirectoryInfo.decode(card) #:nodoc:
@@ -67,7 +65,7 @@ module Vpim
         raise ArgumentError, "DirectoryInfo cannot be created from a #{card.type}"
       end
 
-      fields = Vpim.decode(string)
+      fields = ::Vcard.decode(string)
 
       new(fields)
     end
@@ -84,9 +82,9 @@ module Vpim
 
       if profile
         p = profile.to_str
-        f = [ Field.create('BEGIN', p) ]
+        f = [ Field.create("BEGIN", p) ]
         f.concat fields
-        f.push Field.create('END', p)
+        f.push Field.create("END", p)
         fields = f
       end
 
@@ -103,7 +101,7 @@ module Vpim
     # The value of the first field named +name+, or nil if no
     # match is found.
     def [](name)
-      enum_by_name(name).each { |f| return f.value if f.value != ''}
+      enum_by_name(name).each { |f| return f.value if f.value != ""}
       enum_by_name(name).each { |f| return f.value }
       nil
     end
@@ -153,11 +151,11 @@ module Vpim
     #
     # Print all the nicknames in a card:
     #
-    #   card.enum_by_name('NICKNAME') { |f| puts f.value }
+    #   card.enum_by_name("NICKNAME") { |f| puts f.value }
     #
     # Print an Array of the preferred email addresses in the card:
     #
-    #   pref_emails = card.enum_by_name('EMAIL').select { |f| f.pref? }
+    #   pref_emails = card.enum_by_name("EMAIL").select { |f| f.pref? }
     def enum_by_name(name)
       Enumerator.new(self, Proc.new { |field| field.name?(name) })
     end
@@ -172,9 +170,9 @@ module Vpim
     #     end
     #   end
     #
-    # or to get an array of all the fields in group 'AGROUP', you could do:
+    # or to get an array of all the fields in group "AGROUP", you could do:
     #
-    #   card.enum_by_group('AGROUP').to_a
+    #   card.enum_by_group("AGROUP").to_a
     def enum_by_group(group)
       Enumerator.new(self, Proc.new { |field| field.group?(group) })
     end
@@ -224,8 +222,8 @@ module Vpim
     # the Vcard::Maker examples.
     def delete(field)
       case
-      when field.name?('BEGIN'), field.name?('END')
-        raise ArgumentError, 'Cannot delete BEGIN or END fields.'
+      when field.name?("BEGIN"), field.name?("END")
+        raise ArgumentError, "Cannot delete BEGIN or END fields."
       else
         @fields.delete field
       end
@@ -251,10 +249,10 @@ module Vpim
       unless @fields.first
         raise "No fields to check"
       end
-      unless @fields.first.name? 'BEGIN'
+      unless @fields.first.name? "BEGIN"
         raise "Needs BEGIN, found: #{@fields.first.encode nil}"
       end
-      unless @fields.last.name? 'END'
+      unless @fields.last.name? "END"
         raise "Needs END, found: #{@fields.last.encode nil}"
       end
       unless @fields.last.value? @fields.first.value

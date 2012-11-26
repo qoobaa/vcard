@@ -1,12 +1,10 @@
-=begin
-  Copyright (C) 2008 Sam Roberts
+# Copyright (C) 2008 Sam Roberts
 
-  This library is free software; you can redistribute it and/or modify it
-  under the same terms as the ruby language itself, see the file COPYING for
-  details.
-=end
+# This library is free software; you can redistribute it and/or modify it
+# under the same terms as the ruby language itself, see the file COPYING for
+# details.
 
-module Vpim
+module Vcard
 
   # Attachments are used by both iCalendar and vCard. They are either a URI or
   # inline data, and their decoded value will be either a Uri or a Inline, as
@@ -31,14 +29,14 @@ module Vpim
     # iCalendar and vCard put the format in different parameters, and the
     # default kind of value is different.
     def Attachment.decode(field, defkind, fmtparam) #:nodoc:
-      format = field.pvalue(fmtparam) || ''
+      format = field.pvalue(fmtparam) || ""
       kind = field.kind || defkind
       case kind
-      when 'text'
-        Inline.new(Vpim.decode_text(field.value), format)
-      when 'uri'
+      when "text"
+        Inline.new(::Vcard.decode_text(field.value), format)
+      when "uri"
         Uri.new(field.value_raw, format)
-      when 'binary'
+      when "binary"
         Inline.new(field.value, format)
       else
         raise InvalidEncodingError, "Attachment of type #{kind} is not allowed"
