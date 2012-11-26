@@ -1,11 +1,8 @@
 # Copyright (C) 2008 Sam Roberts
 
-# This library is free software; you can redistribute it and/or modify it
-# under the same terms as the ruby language itself, see the file COPYING for
-# details.
-
-require "open-uri"
-require "stringio"
+# This library is free software; you can redistribute it and/or modify
+# it under the same terms as the ruby language itself, see the file
+# LICENSE-VPIM.txt for details.
 
 module Vcard
   # A vCard, a specialization of a directory info object.

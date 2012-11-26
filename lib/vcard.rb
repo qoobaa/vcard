@@ -1,10 +1,12 @@
 # Copyright (C) 2008 Sam Roberts
 
-# This library is free software; you can redistribute it and/or modify it
-# under the same terms as the ruby language itself, see the file COPYING for
-# details.
+# This library is free software; you can redistribute it and/or modify
+# it under the same terms as the ruby language itself, see the file
+# LICENSE-VPIM.txt for details.
 
 require "date"
+require "open-uri"
+require "stringio"
 
 require "vcard/attachment"
 require "vcard/bnf"

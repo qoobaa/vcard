@@ -8,9 +8,9 @@ Gem::Specification.new do |gem|
   gem.version       = Vcard::VERSION
   gem.authors       = ["Kuba Kuźma"]
   gem.email         = ["kuba@jah.pl"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{Vcard extracted from Vpim}
+  gem.summary       = %q{Vcard extracted from Vpim}
+  gem.homepage      = "http://github.com/qoobaa/vcard"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
