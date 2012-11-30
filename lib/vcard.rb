@@ -55,7 +55,7 @@ module Vcard
   # Convert a RFC 2425 date into an array of [year, month, day].
   def self.decode_date(v) # :nodoc:
     unless v =~ %r{^\s*#{Bnf::DATE}\s*$}
-      raise Vcard::InvalidEncodingError, "date not valid (#{v})"
+      raise ::Vcard::InvalidEncodingError, "date not valid (#{v})"
     end
     [$1.to_i, $2.to_i, $3.to_i]
   end
@@ -86,7 +86,7 @@ module Vcard
   # Convert a RFC 2425 time into an array of [hour,min,sec,secfrac,timezone]
   def self.decode_time(v) # :nodoc:
     unless match = %r{^\s*#{Bnf::TIME}\s*$}.match(v)
-      raise Vcard::InvalidEncodingError, "time '#{v}' not valid"
+      raise ::Vcard::InvalidEncodingError, "time '#{v}' not valid"
     end
     hour, min, sec, secfrac, tz = match.to_a[1..5]
 
@@ -99,7 +99,7 @@ module Vcard
       tz = (dtarray.pop == "Z") ? :gm : :local
       Time.send(tz, *dtarray)
     rescue ArgumentError => e
-      raise Vcard::InvalidEncodingError, "#{tz} #{e} (#{dtarray.join(', ')})"
+      raise ::Vcard::InvalidEncodingError, "#{tz} #{e} (#{dtarray.join(', ')})"
     end
   end
 
@@ -111,7 +111,7 @@ module Vcard
   # Convert a RFC 2425 date-time into an array of [year,mon,day,hour,min,sec,secfrac,timezone]
   def self.decode_date_time(v) # :nodoc:
     unless match = %r{^\s*#{Bnf::DATE}T#{Bnf::TIME}\s*$}.match(v)
-      raise Vcard::InvalidEncodingError, "date-time '#{v}' not valid"
+      raise ::Vcard::InvalidEncodingError, "date-time '#{v}' not valid"
     end
     year, month, day, hour, min, sec, secfrac, tz = match.to_a[1..8]
 
@@ -138,7 +138,7 @@ module Vcard
   # Convert an RFC2425 INTEGER value into an Integer
   def self.decode_integer(v) # :nodoc:
     unless %r{\s*#{Bnf::INTEGER}\s*}.match(v)
-      raise Vcard::InvalidEncodingError, "integer not valid (#{v})"
+      raise ::Vcard::InvalidEncodingError, "integer not valid (#{v})"
     end
     v.to_i
   end
@@ -231,7 +231,7 @@ module Vcard
     when %r{\A#{Bnf::SAFECHAR}*\z}
       value
     else
-      raise Vcard::Unencodable, "paramtext #{value.inspect}"
+      raise ::Vcard::Unencodable, "paramtext #{value.inspect}"
     end
   end
 
@@ -242,7 +242,7 @@ module Vcard
     when %r{\A#{Bnf::QSAFECHAR}*\z}
       '"' + value + '"'
     else
-      raise Vcard::Unencodable, "param-value #{value.inspect}"
+      raise ::Vcard::Unencodable, "param-value #{value.inspect}"
     end
   end
 
