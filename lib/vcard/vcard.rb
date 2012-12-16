@@ -211,7 +211,7 @@ module Vcard
         value = to_str.strip
 
         if value.length < 1
-          raise InvalidEncodingError, "EMAIL must have a value"
+          raise ::Vcard::InvalidEncodingError, "EMAIL must have a value"
         end
 
         params = [ @location, @nonstandard ]
@@ -231,7 +231,7 @@ module Vcard
         value = field.to_text.strip
 
         if value.length < 1
-          raise InvalidEncodingError, "EMAIL must have a value"
+          raise ::Vcard::InvalidEncodingError, "EMAIL must have a value"
         end
 
         eml = Email.new(value)
@@ -301,7 +301,7 @@ module Vcard
         value = to_str.strip
 
         if value.length < 1
-          raise InvalidEncodingError, "TEL must have a value"
+          raise ::Vcard::InvalidEncodingError, "TEL must have a value"
         end
 
         params = [ @location, @capability, @nonstandard ]
@@ -320,7 +320,7 @@ module Vcard
         value = field.to_text.strip
 
         if value.length < 1
-          raise InvalidEncodingError, "TEL must have a value"
+          raise ::Vcard::InvalidEncodingError, "TEL must have a value"
         end
 
         tel = Telephone.new(value)
@@ -498,7 +498,7 @@ module Vcard
       when "vcard", nil
         Line.new( field.group, field.name, ::Vcard.decode(::Vcard.decode_text(field.value_raw)).first )
       else
-        raise InvalidEncodingError, "AGENT type #{field.kind} is not allowed"
+        raise ::Vcard::InvalidEncodingError, "AGENT type #{field.kind} is not allowed"
       end
     end
 
@@ -572,7 +572,7 @@ module Vcard
     def f2l(field) #:nodoc:
       begin
         Line.decode(@@decode, self, field)
-      rescue InvalidEncodingError
+      rescue ::Vcard::InvalidEncodingError
         # Skip invalidly encoded fields.
       end
     end

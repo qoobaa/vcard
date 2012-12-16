@@ -379,8 +379,6 @@ EOF
   def test_bday_decode
     card = Vcard::Vcard.decode(vcard(:bday_decode)).first
 
-    card.birthday
-
     assert_equal(Date.new(1970, 7, 14), card.birthday)
     assert_equal(1, card.values("bday").size)
 
@@ -396,6 +394,12 @@ EOF
     assert_equal(Date.new(Time.now.year, 7, 14), card.values("bday")[1])
     assert_equal(DateTime.new(1970, 7, 15, 3, 45, 12).to_s, card.values("bday")[2].to_s)
     assert_equal(DateTime.new(1970, 7, 15, 3, 45, 12).to_s, card.values("bday").last.to_s)
+  end
+
+  def test_bday_decode_3
+    card = Vcard::Vcard.decode(vcard(:bday_decode_3)).first
+
+    assert_equal(Date.new(1980, 10, 25), card.birthday)
   end
 
   def test_utf_heuristics
@@ -474,4 +478,3 @@ EOF
     _test_org("Megamix Corp.", "Marketing")
   end
 end
-

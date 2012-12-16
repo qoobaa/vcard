@@ -39,7 +39,7 @@ module Vcard
       when "binary"
         Inline.new(field.value, format)
       else
-        raise InvalidEncodingError, "Attachment of type #{kind} is not allowed"
+        raise ::Vcard::InvalidEncodingError, "Attachment of type #{kind} is not allowed"
       end
     end
 
