@@ -440,23 +440,18 @@ module Vcard
     end
 
     def decode_bday(field) #:nodoc:
-      begin
-        return decode_date_or_datetime(field)
-
-      rescue ::Vcard::InvalidEncodingError
-        # Hack around BDAY dates hat are correct in the month and day, but have
-        # some kind of garbage in the year.
-        if field.value =~ /^\s*(\d+)-(\d+)-(\d+)\s*$/
-          y = $1.to_i
-          m = $2.to_i
-          d = $3.to_i
-          if(y < 1900)
-            y = Time.now.year
-          end
-          Line.new( field.group, field.name, Date.new(y, m, d) )
-        else
-          raise
-        end
+      decode_date_or_datetime(field)
+    rescue ::Vcard::InvalidEncodingError
+      # Hack around BDAY dates hat are correct in the month and day, but have
+      # some kind of garbage in the year.
+      if field.value =~ /^\s*(\d+)-(\d+)-(\d+)\s*$/
+        y = $1.to_i
+        y = Time.now.year if y < 1900
+        m = $2.to_i
+        d = $3.to_i
+        Line.new( field.group, field.name, Date.new(y, m, d) )
+      else
+        raise
       end
     end
 
@@ -570,11 +565,9 @@ module Vcard
 
     # Return line for a field
     def f2l(field) #:nodoc:
-      begin
-        Line.decode(@@decode, self, field)
-      rescue ::Vcard::InvalidEncodingError
-        # Skip invalidly encoded fields.
-      end
+      Line.decode(@@decode, self, field)
+    rescue ::Vcard::InvalidEncodingError
+      # Skip invalidly encoded fields.
     end
 
     # With no block, returns an Array of Line. If +name+ is specified, the
@@ -1034,7 +1027,7 @@ module Vcard
       def make # :nodoc:
         yield self
         unless @card["N"]
-          raise Unencodeable, "N field is mandatory"
+          raise ::Vcard::Unencodeable, "N field is mandatory"
         end
         fn = @card.field("FN")
         if fn && fn.value.strip.length == 0
@@ -1377,14 +1370,12 @@ module Vcard
 
       # Delete +line+ if block yields true.
       def delete_if #:yield: line
-        begin
-          @card.delete_if do |line|
-            yield line
-          end
-        rescue NoMethodError
-          # FIXME - this is a hideous hack, allowing a DirectoryInfo to
-          # be passed instead of a Vcard, and for it to almost work. Yuck.
+        @card.delete_if do |line|
+          yield line
         end
+      rescue NoMethodError
+        # FIXME - this is a hideous hack, allowing a DirectoryInfo to
+        # be passed instead of a Vcard, and for it to almost work. Yuck.
       end
 
     end
