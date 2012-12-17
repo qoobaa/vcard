@@ -176,33 +176,34 @@ EOF
 
   def test_create
     card = Vcard::Vcard.create
-
     key = Vcard::DirectoryInfo.decode("key;type=x509;encoding=B:dGhpcyBjb3VsZCBiZSAKbXkgY2VydGlmaWNhdGUK\n")['key']
-
     card << Vcard::DirectoryInfo::Field.create('key', key, 'encoding' => :b64)
-
     assert_equal(key, card['key'])
   end
 
-  def test_values
-    # date
-    assert_equal [2002, 4, 22],       Vcard.decode_date(" 20020422  ")
-    assert_equal [2002, 4, 22],       Vcard.decode_date(" 2002-04-22  ")
-    assert_equal [2002, 4, 22],       Vcard.decode_date(" 2002-04-22 \n")
+  def test_decode_date
+    assert_equal [2002, 4, 22], Vcard.decode_date(" 20020422  ")
+    assert_equal [2002, 4, 22], Vcard.decode_date(" 2002-04-22  ")
+    assert_equal [2002, 4, 22], Vcard.decode_date(" 2002-04-22 \n")
+  end
+
+  def test_decode_date_list
     assert_equal [[2002, 4, 22]], Vcard.decode_date_list(" 2002-04-22 ")
     assert_equal [[2002, 4, 22],[2002, 4, 22]], Vcard.decode_date_list(" 2002-04-22, 2002-04-22,")
     assert_equal [[2002, 4, 22],[2002, 4, 22]], Vcard.decode_date_list(" 2002-04-22,,, ,   ,2002-04-22, , \n")
     assert_equal [], Vcard.decode_date_list("  ,           , ")
+  end
 
-    # time
+  def test_decode_time
     assert_equal [4, 53, 22, 0, nil], Vcard.decode_time(" 04:53:22 \n")
     assert_equal [4, 53, 22, 0.10, nil], Vcard.decode_time(" 04:53:22.10 \n")
     assert_equal [4, 53, 22, 0.10, "Z"], Vcard.decode_time(" 04:53:22.10Z \n")
     assert_equal [4, 53, 22, 0, "Z"], Vcard.decode_time(" 045322Z \n")
     assert_equal [4, 53, 22, 0, "+0530"], Vcard.decode_time(" 04:5322+0530 \n")
     assert_equal [4, 53, 22, 0.10, "Z"], Vcard.decode_time(" 045322.10Z \n")
+  end
 
-    # date-time
+  def test_decode_date_time
     assert_equal [2002, 4, 22, 4, 53, 22, 0, nil], Vcard.decode_date_time("20020422T04:53:22 \n")
     assert_equal [2002, 4, 22, 4, 53, 22, 0.10, nil], Vcard.decode_date_time(" 2002-04-22T04:53:22.10 \n")
     assert_equal [2002, 4, 22, 4, 53, 22, 0.10, "Z"], Vcard.decode_date_time(" 20020422T04:53:22.10Z \n")
@@ -210,9 +211,13 @@ EOF
     assert_equal [2002, 4, 22, 4, 53, 22, 0, "+0530"], Vcard.decode_date_time(" 20020422T04:5322+0530 \n")
     assert_equal [2002, 4, 22, 4, 53, 22, 0.10, "Z"], Vcard.decode_date_time(" 20020422T045322.10Z \n")
     assert_equal [2003, 3, 25, 3, 20, 35, 0, "Z"], Vcard.decode_date_time("20030325T032035Z")
+  end
 
-    # text
+  def test_decode_text
     assert_equal "aa,\n\n,\\,\\a;;b", Vcard.decode_text('aa,\\n\\n,\\\\\,\\\\a\;\;b')
+  end
+
+  def test_decode_text_list
     assert_equal ['', "1\n2,3", "bbb", '', "zz", ''], Vcard.decode_text_list(',1\\n2\\,3,bbb,,zz,')
   end
 
