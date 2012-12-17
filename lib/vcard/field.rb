@@ -101,7 +101,7 @@ module Vcard
       # Decode a field.
       def Field.decode0(atline) # :nodoc:
         if !(atline =~ Bnf::LINE)
-          raise ::Vcard::InvalidEncodingError.new(atline)
+          raise ::Vcard::InvalidEncodingError, atline
         end
 
         atgroup = $1.upcase
@@ -427,27 +427,25 @@ module Vcard
       # saying what the year is that breaks, so they at least know that
       # its ridiculous! I think I need my own DateTime variant.
       def to_time
-        begin
-          ::Vcard.decode_date_time_list(value).collect do |d|
-            # We get [ year, month, day, hour, min, sec, usec, tz ]
-            begin
-              if(d.pop == "Z")
-                Time.gm(*d)
-              else
-                Time.local(*d)
-              end
-            rescue ArgumentError => e
-              raise ::Vcard::InvalidEncodingError, "Time.gm(#{d.join(', ')}) failed with #{e.message}"
-            end
-          end
-        rescue ::Vcard::InvalidEncodingError
-          ::Vcard.decode_date_list(value).collect do |d|
-            # We get [ year, month, day ]
-            begin
+        ::Vcard.decode_date_time_list(value).collect do |d|
+          # We get [ year, month, day, hour, min, sec, usec, tz ]
+          begin
+            if(d.pop == "Z")
               Time.gm(*d)
-            rescue ArgumentError => e
-              raise ::Vcard::InvalidEncodingError, "Time.gm(#{d.join(', ')}) failed with #{e.message}"
+            else
+              Time.local(*d)
             end
+          rescue ArgumentError => e
+            raise ::Vcard::InvalidEncodingError, "Time.gm(#{d.join(', ')}) failed with #{e.message}"
+          end
+        end
+      rescue ::Vcard::InvalidEncodingError
+        ::Vcard.decode_date_list(value).collect do |d|
+          # We get [ year, month, day ]
+          begin
+            Time.gm(*d)
+          rescue ArgumentError => e
+            raise ::Vcard::InvalidEncodingError, "Time.gm(#{d.join(', ')}) failed with #{e.message}"
           end
         end
       end
@@ -460,16 +458,14 @@ module Vcard
       # decoding is tried first as a DATE-TIME, then as a DATE, if neither
       # works an InvalidEncodingError will be raised.
       def to_date
-        begin
-          ::Vcard.decode_date_time_list(value).collect do |d|
-            # We get [ year, month, day, hour, min, sec, usec, tz ]
-            Date.new(d[0], d[1], d[2])
-          end
-        rescue ::Vcard::InvalidEncodingError
-          ::Vcard.decode_date_list(value).collect do |d|
-            # We get [ year, month, day ]
-            Date.new(*d)
-          end
+        ::Vcard.decode_date_time_list(value).collect do |d|
+          # We get [ year, month, day, hour, min, sec, usec, tz ]
+          Date.new(d[0], d[1], d[2])
+        end
+      rescue ::Vcard::InvalidEncodingError
+        ::Vcard.decode_date_list(value).collect do |d|
+          # We get [ year, month, day ]
+          Date.new(*d)
         end
       end
 
@@ -591,14 +587,11 @@ module Vcard
       # new fields, not old fields.
       def mutate(g, n, p, v) #:nodoc:
         line = Field.encode0(g, n, p, v)
-
-        begin
-          @group, @name, @params, @value = Field.decode0(line)
-          @line = line
-        rescue ::Vcard::InvalidEncodingError => e
-          raise ArgumentError, e.to_s
-        end
+        @group, @name, @params, @value = Field.decode0(line)
+        @line = line
         self
+      rescue ::Vcard::InvalidEncodingError => e
+        raise ArgumentError, e.to_s
       end
 
       private :mutate
