@@ -100,8 +100,8 @@ module Vcard
 
       # Decode a field.
       def Field.decode0(atline) # :nodoc:
-        unless atline =~ %r{#{Bnf::LINE}}i
-          raise ::Vcard::InvalidEncodingError, atline
+        if !(atline =~ Bnf::LINE)
+          raise ::Vcard::InvalidEncodingError.new(atline)
         end
 
         atgroup = $1.upcase
@@ -126,7 +126,7 @@ module Vcard
         if paramslist.size > 1
 
           # v3.0 and v2.1 params
-          paramslist.scan( %r{#{Bnf::PARAM}}i ) do
+          paramslist.scan( Bnf::PARAM ) do
 
             # param names are case-insensitive, and multi-valued
             name = $1.upcase
@@ -156,7 +156,7 @@ module Vcard
               atparams[name] = []
             end
 
-            params.scan( %r{#{Bnf::PVALUE}} ) do
+            params.scan( Bnf::PVALUE ) do
               atparams[name] << ($1 || $2)
             end
           end
