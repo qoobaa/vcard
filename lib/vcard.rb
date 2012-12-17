@@ -30,9 +30,9 @@ module Vcard
         line.chomp!
         # If it's a continuation line, add it to the last.
         # If it's an empty line, drop it from the input.
-        if( line =~ /^[ \t]/ )
+        if line =~ /^[ \t]/
           unfolded[-1] << line[1, line.size-1]
-        elsif( line =~ /^$/ )
+        elsif line =~ /^$/
         else
           unfolded << line
         end
@@ -49,14 +49,13 @@ module Vcard
       item.chomp!(sep)
       list << yield(item)
     end
+
     list
   end
 
   # Convert a RFC 2425 date into an array of [year, month, day].
   def self.decode_date(v) # :nodoc:
-    if !(v =~ Bnf::DATE)
-      raise ::Vcard::InvalidEncodingError, "date not valid (#{v})"
-    end
+    raise ::Vcard::InvalidEncodingError, "date not valid (#{v})" unless v =~ Bnf::DATE
     [$1.to_i, $2.to_i, $3.to_i]
   end
 
@@ -70,31 +69,29 @@ module Vcard
 
   # Encode a Date object as "yyyymmdd".
   def self.encode_date(d) # :nodoc:
-     "%0.4d%0.2d%0.2d" % [ d.year, d.mon, d.day ]
+     "%0.4d%0.2d%0.2d" % [d.year, d.mon, d.day]
   end
 
   # Encode a Date object as "yyyymmdd".
   def self.encode_time(d) # :nodoc:
-     "%0.4d%0.2d%0.2d" % [ d.year, d.mon, d.day ]
+     "%0.4d%0.2d%0.2d" % [d.year, d.mon, d.day]
   end
 
   # Encode a Time or DateTime object as "yyyymmddThhmmss"
   def self.encode_date_time(d) # :nodoc:
-     "%0.4d%0.2d%0.2dT%0.2d%0.2d%0.2d" % [ d.year, d.mon, d.day, d.hour, d.min, d.sec ]
+     "%0.4d%0.2d%0.2dT%0.2d%0.2d%0.2d" % [d.year, d.mon, d.day, d.hour, d.min, d.sec]
   end
 
   # Convert a RFC 2425 time into an array of [hour,min,sec,secfrac,timezone]
   def self.decode_time(v) # :nodoc:
-    if !(match = Bnf::TIME.match(v))
-      raise ::Vcard::InvalidEncodingError, "time '#{v}' not valid"
-    end
+    raise ::Vcard::InvalidEncodingError, "time '#{v}' not valid" unless match = Bnf::TIME.match(v)
     hour, min, sec, secfrac, tz = match.to_a[1..5]
 
     [hour.to_i, min.to_i, sec.to_i, secfrac ? secfrac.to_f : 0, tz]
   end
 
   def self.array_datetime_to_time(dtarray) #:nodoc:
-  # We get [ year, month, day, hour, min, sec, usec, tz ]
+  # We get [year, month, day, hour, min, sec, usec, tz]
     tz = (dtarray.pop == "Z") ? :gm : :local
     Time.send(tz, *dtarray)
   rescue ArgumentError => e
@@ -108,9 +105,7 @@ module Vcard
 
   # Convert a RFC 2425 date-time into an array of [year,mon,day,hour,min,sec,secfrac,timezone]
   def self.decode_date_time(v) # :nodoc:
-    if !(match = Bnf::DATE_TIME.match(v))
-      raise ::Vcard::InvalidEncodingError, "date-time '#{v}' not valid"
-    end
+    raise ::Vcard::InvalidEncodingError, "date-time '#{v}' not valid" unless match = Bnf::DATE_TIME.match(v)
     year, month, day, hour, min, sec, secfrac, tz = match.to_a[1..8]
 
     [
@@ -135,9 +130,7 @@ module Vcard
 
   # Convert an RFC2425 INTEGER value into an Integer
   def self.decode_integer(v) # :nodoc:
-    if !(v =~ Bnf::INTEGER)
-      raise ::Vcard::InvalidEncodingError, "integer not valid (#{v})"
-    end
+    raise ::Vcard::InvalidEncodingError, "integer not valid (#{v})" unless v =~ Bnf::INTEGER
     v.to_i
   end
 
@@ -148,9 +141,7 @@ module Vcard
   def self.decode_date_list(v) # :nodoc:
     decode_list(v) do |date|
       date.strip!
-      if date.length > 0
-        decode_date(date)
-      end
+      decode_date(date) if date.length > 0
     end.compact
   end
 
@@ -158,9 +149,7 @@ module Vcard
   def self.decode_time_list(v) # :nodoc:
     decode_list(v) do |time|
       time.strip!
-      if time.length > 0
-        decode_time(time)
-      end
+      decode_time(time) if time.length > 0
     end.compact
   end
 
@@ -168,9 +157,7 @@ module Vcard
   def self.decode_date_time_list(v) # :nodoc:
     decode_list(v) do |datetime|
       datetime.strip!
-      if datetime.length > 0
-        decode_date_time(datetime)
-      end
+      decode_date_time(datetime) if datetime.length > 0
     end.compact
   end
 
@@ -197,27 +184,21 @@ module Vcard
   end
 
   def self.encode_text(v) #:nodoc:
-    v.to_str.gsub(/([\\,;\n])/) { $1 == "\n" ? "\\n" : "\\"+$1 }
+    v.to_str.gsub(/([\\,;\n])/) { $1 == "\n" ? "\\n" : "\\#{$1}" }
   end
 
   # v is an Array of String, or just a single String
   def self.encode_text_list(v, sep = ",") #:nodoc:
-    begin
-      v.to_ary.map{ |t| encode_text(t) }.join(sep)
-    rescue
-      encode_text(v)
-    end
+    v.to_ary.map { |t| encode_text(t) }.join(sep)
+  rescue
+    encode_text(v)
   end
 
   # Convert a +sep+-seperated list of TEXT values into an array of values.
   def self.decode_text_list(value, sep = ",") # :nodoc:
     # Need to do in two stages, as best I can find.
-    list = value.scan(/([^#{sep}\\]*(?:\\.[^#{sep}\\]*)*)#{sep}/).map do |v|
-      decode_text(v.first)
-    end
-    if value.match(/([^#{sep}\\]*(?:\\.[^#{sep}\\]*)*)$/)
-      list << $1
-    end
+    list = value.scan(/([^#{sep}\\]*(?:\\.[^#{sep}\\]*)*)#{sep}/).map { |v| decode_text(v.first) }
+    list << $1 if value.match(/([^#{sep}\\]*(?:\\.[^#{sep}\\]*)*)$/)
     list
   end
 
@@ -236,7 +217,7 @@ module Vcard
     if value =~ Bnf::ALL_SAFECHARS
       value
     elsif value =~ Bnf::ALL_QSAFECHARS
-      '"' + value + '"'
+      %Q{"#{value}"}
     else
       raise ::Vcard::Unencodable, "param-value #{value.inspect}"
     end
@@ -245,7 +226,7 @@ module Vcard
   # Unfold the lines in +card+, then return an array of one Field object per
   # line.
   def self.decode(card) #:nodoc:
-    unfold(card).collect { |line| DirectoryInfo::Field.decode(line) }
+    unfold(card).map { |line| DirectoryInfo::Field.decode(line) }
   end
 
 
@@ -259,15 +240,14 @@ module Vcard
     dst = []
     # stack used to track our nesting level, as we see begin/end we start a
     # new/finish the current entity, and push/pop that entity from the stack
-    current = [ dst ]
+    current = [dst]
 
     for f in src
       if f.name? "BEGIN"
-        e = [ f ]
+        e = [f]
 
         current.last.push(e)
         current.push(e)
-
       elsif f.name? "END"
         current.last.push(f)
 
@@ -276,7 +256,6 @@ module Vcard
         end
 
         current.pop
-
       else
         current.last.push(f)
       end
@@ -296,8 +275,8 @@ module Vcard
     inner = []
     fields.each do |line|
       case line
-      when Array; inner << line
-      else;       outer << line
+      when Array then inner << line
+      else outer << line
       end
     end
     return outer, inner
