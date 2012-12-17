@@ -407,7 +407,7 @@ module Vcard
         v = param("VALUE")
         if v
           if v.size > 1
-            raise InvalidEncodingError, "multi-valued param 'VALUE' (#{values})"
+            raise ::Vcard::InvalidEncodingError, "multi-valued param 'VALUE' (#{values})"
           end
           v = v.first.downcase
         end

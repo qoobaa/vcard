@@ -84,7 +84,7 @@ class FieldTest < Test::Unit::TestCase
       "g.:",
       ":v",
     ].each do |line|
-      assert_raises(Vcard::InvalidEncodingError) { Field.decode0(line) }
+      assert_raises(::Vcard::InvalidEncodingError) { Field.decode0(line) }
     end
   end
 

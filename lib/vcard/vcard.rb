@@ -1034,7 +1034,7 @@ module Vcard
       def make # :nodoc:
         yield self
         unless @card["N"]
-          raise Unencodeable, "N field is mandatory"
+          raise ::Vcard::Unencodeable, "N field is mandatory"
         end
         fn = @card.field("FN")
         if fn && fn.value.strip.length == 0

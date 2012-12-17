@@ -24,7 +24,7 @@ class VcardTest < Test::Unit::TestCase
     card = nil
     assert_nothing_thrown { card = Vcard::Vcard.decode(vcard(:ex2)).first }
     assert_equal(vcard(:ex2), card.encode(0))
-    assert_raises(InvalidEncodingError) { card.version }
+    assert_raises(::Vcard::InvalidEncodingError) { card.version }
 
     assert_equal("Bj=F8rn Jensen", card.name.fullname)
     assert_equal("Jensen",  card.name.family)
@@ -169,7 +169,7 @@ EOF
 
   def test_bad
     # FIXME: this should THROW, it's badly encoded!
-    assert_raises(InvalidEncodingError) do
+    assert_raises(::Vcard::InvalidEncodingError) do
       Vcard::Vcard.decode("BEGIN:VCARD\nVERSION:3.0\nKEYencoding=b:this could be \nmy certificate\n\nEND:VCARD\n")
     end
   end
@@ -301,11 +301,11 @@ EOF
   def test_modify_name
     card = Vcard.decode("begin:vcard\nend:vcard\n").first
 
-    assert_raises(InvalidEncodingError) do
+    assert_raises(::Vcard::InvalidEncodingError) do
       card.name
     end
 
-    assert_raises(Unencodeable) do
+    assert_raises(::Vcard::Unencodeable) do
       Vcard::Maker.make2(card) {}
     end
 
