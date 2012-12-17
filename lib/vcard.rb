@@ -54,7 +54,7 @@ module Vcard
 
   # Convert a RFC 2425 date into an array of [year, month, day].
   def self.decode_date(v) # :nodoc:
-    unless v =~ %r{^\s*#{Bnf::DATE}\s*$}
+    if !(v =~ Bnf::DATE)
       raise ::Vcard::InvalidEncodingError, "date not valid (#{v})"
     end
     [$1.to_i, $2.to_i, $3.to_i]
@@ -85,7 +85,7 @@ module Vcard
 
   # Convert a RFC 2425 time into an array of [hour,min,sec,secfrac,timezone]
   def self.decode_time(v) # :nodoc:
-    unless match = %r{^\s*#{Bnf::TIME}\s*$}.match(v)
+    if !(match = Bnf::TIME.match(v))
       raise ::Vcard::InvalidEncodingError, "time '#{v}' not valid"
     end
     hour, min, sec, secfrac, tz = match.to_a[1..5]
@@ -94,13 +94,11 @@ module Vcard
   end
 
   def self.array_datetime_to_time(dtarray) #:nodoc:
-    # We get [ year, month, day, hour, min, sec, usec, tz ]
-    begin
-      tz = (dtarray.pop == "Z") ? :gm : :local
-      Time.send(tz, *dtarray)
-    rescue ArgumentError => e
-      raise ::Vcard::InvalidEncodingError, "#{tz} #{e} (#{dtarray.join(', ')})"
-    end
+  # We get [ year, month, day, hour, min, sec, usec, tz ]
+    tz = (dtarray.pop == "Z") ? :gm : :local
+    Time.send(tz, *dtarray)
+  rescue ArgumentError => e
+    raise ::Vcard::InvalidEncodingError, "#{tz} #{e} (#{dtarray.join(', ')})"
   end
 
   # Convert a RFC 2425 time into an array of Time objects.
@@ -110,7 +108,7 @@ module Vcard
 
   # Convert a RFC 2425 date-time into an array of [year,mon,day,hour,min,sec,secfrac,timezone]
   def self.decode_date_time(v) # :nodoc:
-    unless match = %r{^\s*#{Bnf::DATE}T#{Bnf::TIME}\s*$}.match(v)
+    if !(match = Bnf::DATE_TIME.match(v))
       raise ::Vcard::InvalidEncodingError, "date-time '#{v}' not valid"
     end
     year, month, day, hour, min, sec, secfrac, tz = match.to_a[1..8]
@@ -137,7 +135,7 @@ module Vcard
 
   # Convert an RFC2425 INTEGER value into an Integer
   def self.decode_integer(v) # :nodoc:
-    unless %r{\s*#{Bnf::INTEGER}\s*}.match(v)
+    if !(v =~ Bnf::INTEGER)
       raise ::Vcard::InvalidEncodingError, "integer not valid (#{v})"
     end
     v.to_i
@@ -227,8 +225,7 @@ module Vcard
   # paramtext  = *SAFE-CHAR
   # quoted-string      = DQUOTE *QSAFE-CHAR DQUOTE
   def self.encode_paramtext(value)
-    case value
-    when %r{\A#{Bnf::SAFECHAR}*\z}
+    if value =~ Bnf::ALL_SAFECHARS
       value
     else
       raise ::Vcard::Unencodable, "paramtext #{value.inspect}"
@@ -236,16 +233,14 @@ module Vcard
   end
 
   def self.encode_paramvalue(value)
-    case value
-    when %r{\A#{Bnf::SAFECHAR}*\z}
+    if value =~ Bnf::ALL_SAFECHARS
       value
-    when %r{\A#{Bnf::QSAFECHAR}*\z}
+    elsif value =~ Bnf::ALL_QSAFECHARS
       '"' + value + '"'
     else
       raise ::Vcard::Unencodable, "param-value #{value.inspect}"
     end
   end
-
 
   # Unfold the lines in +card+, then return an array of one Field object per
   # line.
