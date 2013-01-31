@@ -1,3 +1,4 @@
+# encoding: ascii
 # Copyright (C) 2008 Sam Roberts
 
 # This library is free software; you can redistribute it and/or modify
@@ -59,12 +60,14 @@ module Vcard
 
     # QSAFE-CHAR = WSP / %x21 / %x23-7E / NON-US-ASCII
     #  ; Any character except CTLs and DQUOTE
-    QSAFECHAR = /[ \t\x21\x23-\x7e\x80-\xff]/
+    # set ascii encoding so that multibyte chars can be properly escaped
+    QSAFECHAR = Regexp.new("[ \t\x21\x23-\x7e\x80-\xff]")
     ALL_QSAFECHARS = /\A#{QSAFECHAR}*\z/
 
     # SAFE-CHAR  = WSP / %x21 / %x23-2B / %x2D-39 / %x3C-7E / NON-US-ASCII
     #   ; Any character except CTLs, DQUOTE, ";", ":", ","
-    SAFECHAR = /[ \t\x21\x23-\x2b\x2d-\x39\x3c-\x7e\x80-\xff]/
+    # escape character classes then create new Regexp
+    SAFECHAR = Regexp.new(Regexp.escape("[ \t\x21\x23-\x2b\x2d-\x39\x3c-\x7e\x80-\xff]"))
     ALL_SAFECHARS = /\A#{SAFECHAR}*\z/
   end
 end
