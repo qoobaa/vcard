@@ -531,7 +531,7 @@ module Vcard
       "TITLE"      => :decode_text,
       "UID"        => :decode_text,
       "URL"        => :decode_uri,
-      "VERSION"    => :decode_version,
+      "VERSION"    => :decode_version
     }
 
     @@decode.default = :decode_default
