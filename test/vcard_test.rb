@@ -492,7 +492,7 @@ EOF
         n.given = "John"
         n.family = "Woe"
       end
-      m.add_role role
+      m.role = 'Office Manager;Something Else'
     end
     assert_equal(role, card.role)
     assert(card.to_s['Office Manager\;Something Else'])
