@@ -30,6 +30,7 @@ class VcardTest < Test::Unit::TestCase
     assert_equal("Jensen",  card.name.family)
     assert_equal("Bj=F8rn", card.name.given)
     assert_equal("",        card.name.prefix)
+    assert_equal('Office Manager;Something Else', card.role)
 
     assert_equal("Bj=F8rn Jensen", card[ "fn" ])
     assert_equal("+1 313 747-4454", card[ "tEL" ])
@@ -481,5 +482,21 @@ EOF
 
   def test_org_multiple
     _test_org("Megamix Corp.", "Marketing")
+  end
+
+  def test_role
+    role = 'Office Manager;Something Else'
+
+    card = Vcard::Vcard::Maker.make2 do |m|
+      m.name do |n|
+        n.given = "John"
+        n.family = "Woe"
+      end
+      m.role = 'Office Manager;Something Else'
+    end
+    assert_equal(role, card.role)
+    assert(card.to_s['Office Manager\;Something Else'])
+    card = Vcard::Vcard.decode(card.encode).first
+    assert_equal(role, card.role)
   end
 end

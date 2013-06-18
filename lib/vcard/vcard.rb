@@ -950,6 +950,10 @@ module Vcard
       v
     end
 
+    def role
+      value("ROLE")
+    end
+
     # Make changes to a vCard.
     #
     # Yields a Vcard::Vcard::Maker that can be used to modify this vCard.
@@ -1314,6 +1318,14 @@ module Vcard
         @card << ::Vcard::DirectoryInfo::Field.create( "ORG", org );
       end
 
+      # Set the role field, ROLE.
+      #
+      # It can be set to a single String.
+      def role=(role)
+        delete_if { |l| l.name == "ROLE" }
+
+        @card << ::Vcard::DirectoryInfo::Field.create( "ROLE", ::Vcard.encode_text(role));
+      end
 
       # Add a URL field, URL.
       def add_url(url)
