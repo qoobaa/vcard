@@ -499,4 +499,20 @@ EOF
     card = Vcard::Vcard.decode(card.encode).first
     assert_equal(role, card.role)
   end
+
+  def test_note
+    note = "Here is the first line\r\nHere is the second line."
+
+    card = Vcard::Vcard::Maker.make2 do |m|
+      m.name do |n|
+        n.given = "John"
+        n.family = "Woe"
+      end
+      m.add_note note
+    end
+    assert_equal(note, card.note)
+    assert(card.to_s['Here is the first line\nHere is the second line.'])
+    card = Vcard::Vcard.decode(card.encode).first
+    assert_equal(note, card.note)
+  end
 end
