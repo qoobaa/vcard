@@ -490,7 +490,7 @@ EOF
         n.given = "John"
         n.family = "Woe"
       end
-      m.role = "Office Manager\r\n;Something Else"
+      m.add_role "Office Manager\r\n;Something Else"
     end
     assert_equal "Office Manager\n;Something Else", card.role
     assert_match /Office Manager\\n\\;Something Else/, card.to_s
