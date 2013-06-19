@@ -485,18 +485,30 @@ EOF
   end
 
   def test_role
-    role = 'Office Manager;Something Else'
-
     card = Vcard::Vcard::Maker.make2 do |m|
       m.name do |n|
         n.given = "John"
         n.family = "Woe"
       end
-      m.role = 'Office Manager;Something Else'
+      m.role = "Office Manager\r\n;Something Else"
     end
-    assert_equal(role, card.role)
-    assert(card.to_s['Office Manager\;Something Else'])
+    assert_equal "Office Manager\n;Something Else", card.role
+    assert_match /Office Manager\\n\\;Something Else/, card.to_s
     card = Vcard::Vcard.decode(card.encode).first
-    assert_equal(role, card.role)
+    assert_equal "Office Manager\n;Something Else", card.role
+  end
+
+  def test_note
+    card = Vcard::Vcard::Maker.make2 do |m|
+      m.name do |n|
+        n.given = "John"
+        n.family = "Woe"
+      end
+      m.add_note note = "line1\r\n;line2"
+    end
+    assert_equal "line1\n;line2", card.note
+    assert_match /line1\\n\\;line2/, card.to_s
+    card = Vcard::Vcard.decode(card.encode).first
+    assert_equal "line1\n;line2", card.note
   end
 end

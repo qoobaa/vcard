@@ -184,7 +184,7 @@ module Vcard
   end
 
   def self.encode_text(v) #:nodoc:
-    v.to_str.gsub(/([\\,;\n])/) { $1 == "\n" ? "\\n" : "\\#{$1}" }
+    v.to_str.gsub(/[\\,;]/, '\\\\\0').gsub(/\r?\n/, "\\n")
   end
 
   # v is an Array of String, or just a single String
