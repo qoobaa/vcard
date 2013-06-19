@@ -1318,13 +1318,11 @@ module Vcard
         @card << ::Vcard::DirectoryInfo::Field.create( "ORG", org );
       end
 
-      # Set the role field, ROLE.
+      # Add a role field, ROLE.
       #
       # It can be set to a single String.
-      def role=(role)
-        delete_if { |l| l.name == "ROLE" }
-
-        @card << ::Vcard::DirectoryInfo::Field.create( "ROLE", ::Vcard.encode_text(role));
+      def add_role(role)
+        @card << ::Vcard::DirectoryInfo::Field.create("ROLE", ::Vcard.encode_text(role));
       end
 
       # Add a URL field, URL.
