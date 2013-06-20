@@ -305,14 +305,10 @@ EOF
   end
 
   def test_modify_name
-    card = Vcard.decode("begin:vcard\nend:vcard\n").first
-
-    assert_raises(::Vcard::InvalidEncodingError) do
-      card.name
-    end
+    card = Vcard::Vcard.decode("begin:vcard\nend:vcard\n").first
 
     assert_raises(::Vcard::Unencodeable) do
-      Vcard::Maker.make2(card) {}
+      Vcard::Vcard::Maker.make2(card) {}
     end
 
     card.make do |m|
