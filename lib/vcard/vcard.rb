@@ -649,7 +649,6 @@ module Vcard
         raise ArgumentError, "Vcard.decode cannot be called with a #{card.type}"
       end
 
-      string.force_encoding(Encoding::UTF_8)
       entities = ::Vcard.expand(::Vcard.decode(string))
 
       # Since all vCards must have a begin/end, the top-level should consist

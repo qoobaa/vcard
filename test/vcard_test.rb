@@ -404,25 +404,6 @@ EOF
     assert_equal(Date.new(1980, 10, 25), card.birthday)
   end
 
-  def test_utf_heuristics
-    bom = "\xEF\xBB\xBF"
-    dat = "BEGIN:VCARD\nN:name\nEND:VCARD\n"
-    utf_name_test(bom+dat)
-    utf_name_test(bom+dat.downcase)
-    utf_name_test(dat)
-    utf_name_test(dat.downcase)
-
-    utf_name_test(be(bom+dat))
-    utf_name_test(be(bom+dat.downcase))
-    utf_name_test(be(dat))
-    utf_name_test(be(dat.downcase))
-
-    utf_name_test(le(bom+dat))
-    utf_name_test(le(bom+dat.downcase))
-    utf_name_test(le(dat))
-    utf_name_test(le(dat.downcase))
-  end
-
   # Broken output from Highrise. Report to support@highrisehq.com
   def test_highrises_invalid_google_talk_field
     c = vcard(:highrise)
