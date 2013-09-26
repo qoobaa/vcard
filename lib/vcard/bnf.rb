@@ -69,5 +69,8 @@ module Vcard
     # escape character classes then create new Regexp
     SAFECHAR = Regexp.new(Regexp.escape("[ \t\x21\x23-\x2b\x2d-\x39\x3c-\x7e\x80-\xff]"))
     ALL_SAFECHARS = /\A#{SAFECHAR}*\z/
+
+    # A quoted-printable encoded string with a trailing '=', indicating that it's not terminated
+    UNTERMINATED_QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE:.*=$/
   end
 end
