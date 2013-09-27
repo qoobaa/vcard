@@ -416,14 +416,10 @@ EOF
     assert_equal("http\\://www.homepage.com", card.url.uri)
   end
 
-  def _test_gmail_vcard_export
-    # GOOGLE BUG - Whitespace before the LABEL field values is a broken
-    # line continuation.
-    # GOOGLE BUG - vCards are being exported with embedded "=" in them, so
-    # become unparseable.
+  def test_gmail_vcard_export
     c = vcard(:gmail)
     card = Vcard::Vcard.decode(c).first
-    assert_equal("123 Home, Home Street\r\n Kowloon, N/A\r\n Hong Kong", card.value("label"))
+    assert_equal("123 Home, Home Street\r\nKowloon, N/A\r\nHong Kong", card.value("label"))
   end
 
   def test_title
