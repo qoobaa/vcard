@@ -1,8 +1,7 @@
 # Copyright (C) 2008 Sam Roberts
 
 # This library is free software; you can redistribute it and/or modify
-# it under the same terms as the ruby language itself, see the file
-# VPIM-LICENSE.txt for details.
+# it under the same terms as the ruby language itself.
 
 module Vcard
   # A vCard, a specialization of a directory info object.
