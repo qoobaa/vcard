@@ -41,6 +41,11 @@ module Vcard
         #   [<group>.]<name>;<pname>=<pvalue>,<pvalue>:<value>
 
         if group
+          if RUBY_PLATFORM == "java" && group.class == Symbol
+            # As of JRuby 1.7.6, String#append(symbol) does not raise.
+            # See https://github.com/jruby/jruby/issues/1177
+            raise TypeError, "can't convert Symbol into String"
+          end
           line << group << "."
         end
 
@@ -88,6 +93,11 @@ module Vcard
           line << value.map { |v| Field.value_str(v) }.join(";")
 
         when Symbol
+          if RUBY_PLATFORM == "java"
+            # As of JRuby 1.7.6, String#append(symbol) does not raise.
+            # See https://github.com/jruby/jruby/issues/1177
+            raise TypeError, "can't convert Symbol into String"
+          end
           line << value
 
         else
