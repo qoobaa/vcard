@@ -60,7 +60,12 @@ module Vcard
     # QSAFE-CHAR = WSP / %x21 / %x23-7E / NON-US-ASCII
     #  ; Any character except CTLs and DQUOTE
     # set ascii encoding so that multibyte chars can be properly escaped
-    QSAFECHAR = Regexp.new("[ \t\x21\x23-\x7e\x80-\xff]")
+    if RUBY_PLATFORM == "java" && RUBY_VERSION < "1.9"
+      # JRuby in 1.8 mode doesn't respect the file encoding. See https://github.com/jruby/jruby/issues/1191
+      QSAFECHAR = /[ \t\x21\x23-\x7e\x80-\xff]/
+    else
+      QSAFECHAR = Regexp.new("[ \t\x21\x23-\x7e\x80-\xff]")
+    end
     ALL_QSAFECHARS = /\A#{QSAFECHAR}*\z/
 
     # SAFE-CHAR  = WSP / %x21 / %x23-2B / %x2D-39 / %x3C-7E / NON-US-ASCII
