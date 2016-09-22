@@ -15,3 +15,7 @@ And then execute:
 Or install it yourself as:
 
     $ gem install vcard
+
+## Upgrade Notes
+
+We are no longer testing against Ruby 1.8.7.
