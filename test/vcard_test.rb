@@ -466,7 +466,7 @@ EOF
       m.add_role "Office Manager\r\n;Something Else"
     end
     assert_equal "Office Manager\n;Something Else", card.role
-    assert_match /Office Manager\\n\\;Something Else/, card.to_s
+    assert_match(/Office Manager\\n\\;Something Else/, card.to_s)
     card = Vcard::Vcard.decode(card.encode).first
     assert_equal "Office Manager\n;Something Else", card.role
   end
@@ -477,10 +477,10 @@ EOF
         n.given = "John"
         n.family = "Woe"
       end
-      m.add_note note = "line1\r\n;line2"
+      m.add_note "line1\r\n;line2"
     end
     assert_equal "line1\n;line2", card.note
-    assert_match /line1\\n\\;line2/, card.to_s
+    assert_match(/line1\\n\\;line2/, card.to_s)
     card = Vcard::Vcard.decode(card.encode).first
     assert_equal "line1\n;line2", card.note
   end
