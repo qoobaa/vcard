@@ -305,14 +305,10 @@ EOF
   end
 
   def test_modify_name
-    card = Vcard.decode("begin:vcard\nend:vcard\n").first
-
-    assert_raises(::Vcard::InvalidEncodingError) do
-      card.name
-    end
+    card = Vcard::Vcard.decode("begin:vcard\nend:vcard\n").first
 
     assert_raises(::Vcard::Unencodeable) do
-      Vcard::Maker.make2(card) {}
+      Vcard::Vcard::Maker.make2(card) {}
     end
 
     card.make do |m|
@@ -408,25 +404,6 @@ EOF
     assert_equal(Date.new(1980, 10, 25), card.birthday)
   end
 
-  def test_utf_heuristics
-    bom = "\xEF\xBB\xBF"
-    dat = "BEGIN:VCARD\nN:name\nEND:VCARD\n"
-    utf_name_test(bom+dat)
-    utf_name_test(bom+dat.downcase)
-    utf_name_test(dat)
-    utf_name_test(dat.downcase)
-
-    utf_name_test(be(bom+dat))
-    utf_name_test(be(bom+dat.downcase))
-    utf_name_test(be(dat))
-    utf_name_test(be(dat.downcase))
-
-    utf_name_test(le(bom+dat))
-    utf_name_test(le(bom+dat.downcase))
-    utf_name_test(le(dat))
-    utf_name_test(le(dat.downcase))
-  end
-
   # Broken output from Highrise. Report to support@highrisehq.com
   def test_highrises_invalid_google_talk_field
     c = vcard(:highrise)
@@ -439,14 +416,10 @@ EOF
     assert_equal("http\\://www.homepage.com", card.url.uri)
   end
 
-  def _test_gmail_vcard_export
-    # GOOGLE BUG - Whitespace before the LABEL field values is a broken
-    # line continuation.
-    # GOOGLE BUG - vCards are being exported with embedded "=" in them, so
-    # become unparseable.
+  def test_gmail_vcard_export
     c = vcard(:gmail)
     card = Vcard::Vcard.decode(c).first
-    assert_equal("123 Home, Home Street\r\n Kowloon, N/A\r\n Hong Kong", card.value("label"))
+    assert_equal("123 Home, Home Street\r\nKowloon, N/A\r\nHong Kong", card.value("label"))
   end
 
   def test_title

@@ -107,13 +107,17 @@ class FieldTest < Test::Unit::TestCase
     assert_equal("Z.B", f.group)
     assert_equal("z.b.NAME:z\n", f.encode)
 
-    assert_raises(TypeError) { f.value = :group }
+    f.value = :group
+    assert_equal("Z.B.NAME:group\n", f.encode)
+    f.value = "z"
 
     assert_equal("Z.B", f.group)
 
-    assert_equal("z.b.NAME:z\n", f.encode)
+    assert_equal("Z.B.NAME:z\n", f.encode)
 
-    assert_raises(TypeError) { f.group = :group }
+    f.group = :group
+    assert_equal("group.NAME:z\n", f.encode)
+    f.group = "z.b"
 
     assert_equal("z.b.NAME:z\n", f.encode)
     assert_equal("Z.B", f.group)

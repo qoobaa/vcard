@@ -2,8 +2,7 @@
 # Copyright (C) 2008 Sam Roberts
 
 # This library is free software; you can redistribute it and/or modify
-# it under the same terms as the ruby language itself, see the file
-# VPIM-LICENSE.txt for details.
+# it under the same terms as the ruby language itself.
 
 module Vcard
   # Contains regular expressions for the EBNF of RFC 2425.
@@ -61,7 +60,12 @@ module Vcard
     # QSAFE-CHAR = WSP / %x21 / %x23-7E / NON-US-ASCII
     #  ; Any character except CTLs and DQUOTE
     # set ascii encoding so that multibyte chars can be properly escaped
-    QSAFECHAR = Regexp.new("[ \t\x21\x23-\x7e\x80-\xff]")
+    if RUBY_PLATFORM == "java" && RUBY_VERSION < "1.9"
+      # JRuby in 1.8 mode doesn't respect the file encoding. See https://github.com/jruby/jruby/issues/1191
+      QSAFECHAR = /[ \t\x21\x23-\x7e\x80-\xff]/
+    else
+      QSAFECHAR = Regexp.new("[ \t\x21\x23-\x7e\x80-\xff]")
+    end
     ALL_QSAFECHARS = /\A#{QSAFECHAR}*\z/
 
     # SAFE-CHAR  = WSP / %x21 / %x23-2B / %x2D-39 / %x3C-7E / NON-US-ASCII
@@ -69,5 +73,8 @@ module Vcard
     # escape character classes then create new Regexp
     SAFECHAR = Regexp.new(Regexp.escape("[ \t\x21\x23-\x2b\x2d-\x39\x3c-\x7e\x80-\xff]"))
     ALL_SAFECHARS = /\A#{SAFECHAR}*\z/
+
+    # A quoted-printable encoded string with a trailing '=', indicating that it's not terminated
+    UNTERMINATED_QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE:.*=$/
   end
 end

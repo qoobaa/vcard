@@ -1,8 +1,7 @@
 # Copyright (C) 2008 Sam Roberts
 
 # This library is free software; you can redistribute it and/or modify it
-# under the same terms as the ruby language itself, see the file COPYING for
-# details.
+# under the same terms as the ruby language itself.
 
 module Vcard
 
@@ -42,7 +41,11 @@ module Vcard
         #   [<group>.]<name>;<pname>=<pvalue>,<pvalue>:<value>
 
         if group
-          line << group << "."
+          if group.class == Symbol
+            # Explicitly allow symbols
+            group = group.to_s
+          end
+          line << group.to_str << "."
         end
 
         line << name
@@ -89,7 +92,7 @@ module Vcard
           line << value.map { |v| Field.value_str(v) }.join(";")
 
         when Symbol
-          line << value
+          line << value.to_s
 
         else
           # FIXME - somewhere along here, values with special chars need escaping...
