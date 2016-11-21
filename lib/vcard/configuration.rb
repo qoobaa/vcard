@@ -12,8 +12,5 @@ module Vcard
       @ignore_invalid_vcard = true
     end
 
-    private
-
-
   end
 end
