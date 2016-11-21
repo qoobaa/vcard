@@ -7,6 +7,7 @@ require "date"
 require "open-uri"
 require "stringio"
 
+require "vcard/configuration"
 require "vcard/attachment"
 require "vcard/bnf"
 require "vcard/dirinfo"
@@ -285,4 +286,13 @@ module Vcard
     end
     return outer, inner
   end
+
+  def configuration
+    @configuration ||= Configuration.new
+  end
+
+  def configure
+    yield configuration
+  end
+
 end

@@ -659,7 +659,8 @@ module Vcard
       vcards = []
 
       for e in entities
-        vcards.push(new(e.flatten, "VCARD"))
+        vcard  = new(e.flatten, "VCARD")
+        vcards.push(vcard) if vcard.valid? || !::Vcard.configuration.ignore_invalid_vcards?
       end
 
       vcards

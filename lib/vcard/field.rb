@@ -101,10 +101,12 @@ module Vcard
         line
       end
 
+
       # Decode a field.
       def Field.decode0(atline) # :nodoc:
         if !(atline =~ Bnf::LINE)
-          raise ::Vcard::InvalidEncodingError, atline
+          raise(::Vcard::InvalidEncodingError, atline) if ::Vcard.configuration.raise_on_invalid_line?
+          return false
         end
 
         atgroup = $1.upcase
@@ -165,17 +167,25 @@ module Vcard
           end
         end
 
-        [ atgroup, atname, atparams, atvalue ]
+        [ true, atgroup, atname, atparams, atvalue ]
       end
 
       def initialize(line) # :nodoc:
         @line = line.to_str
-        @group, @name, @params, @value = Field.decode0(@line)
+        @valid, @group, @name, @params, @value = Field.decode0(@line)
 
-        @params.each do |pname,pvalues|
-          pvalues.freeze
+        if valid?
+          @params.each do |pname,pvalues|
+            pvalues.freeze
+          end
+        else
+          @group = @name = ''
         end
         self
+      end
+
+      def valid?
+        @valid
       end
 
       # Create a field by decoding +line+, a String which must already be
@@ -323,7 +333,7 @@ module Vcard
 
       # Is the #name of this Field +name+? Names are case insensitive.
       def name?(name)
-        @name.casecmp(name) == 0
+        @name.to_s.casecmp(name) == 0
       end
 
       # Is the #group of this field +group+? Group names are case insensitive.
@@ -590,7 +600,7 @@ module Vcard
       # new fields, not old fields.
       def mutate(g, n, p, v) #:nodoc:
         line = Field.encode0(g, n, p, v)
-        @group, @name, @params, @value = Field.decode0(line)
+        @valid, @group, @name, @params, @value = Field.decode0(line)
         @line = line
         self
       rescue ::Vcard::InvalidEncodingError => e

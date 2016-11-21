@@ -31,14 +31,25 @@ module Vcard
     # Initialize a DirectoryInfo object from +fields+. If +profile+ is
     # specified, check the BEGIN/END fields.
     def initialize(fields, profile = nil) #:nodoc:
-      if fields.detect { |f| ! f.kind_of? DirectoryInfo::Field }
-        raise ArgumentError, "fields must be an array of DirectoryInfo::Field objects"
+      @valid = true
+      @fields = []
+
+      fields.each do |f|
+        raise ArgumentError, "fields must be an array of DirectoryInfo::Field objects" unless f.kind_of? DirectoryInfo::Field
+        if f.valid?
+          @fields << f
+        else
+          @valid = false
+        end
       end
 
       @string = nil # this is used as a flag to indicate that recoding will be necessary
-      @fields = fields
 
       check_begin_end(profile) if profile
+    end
+
+    def valid?
+      @valid
     end
 
     # Decode +card+ into a DirectoryInfo object.

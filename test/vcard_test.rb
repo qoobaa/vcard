@@ -169,10 +169,48 @@ EOF
   end
 
   def test_bad
-    # FIXME: this should THROW, it's badly encoded!
+    Vcard::configuration.raise_on_invalid_line = true
     assert_raises(::Vcard::InvalidEncodingError) do
       Vcard::Vcard.decode("BEGIN:VCARD\nVERSION:3.0\nKEYencoding=b:this could be \nmy certificate\n\nEND:VCARD\n")
     end
+  end
+
+  def test_not_raise_error_if_configured_to_ignore
+    Vcard::configuration.raise_on_invalid_line = false
+    Vcard::configuration.ignore_invalid_vcards = false
+    assert_nothing_raised do
+      Vcard::Vcard.decode("BEGIN:VCARD\nVERSION:3.0\nKEYencoding=b:this could be \nmy certificate\n\nEND:VCARD\n")
+    end
+  end
+
+  def test_ignore_vcards_with_invalid_fields
+    Vcard::configuration.raise_on_invalid_line = false
+    Vcard::configuration.ignore_invalid_vcards = true
+    src = <<'EOF'
+BEGIN:VCARD
+VERSION:3.0
+KEYencoding=b:this could be
+my certificate
+EMAIL:valid@field.value
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+EMAIL:valid@field.value
+END:VCARD
+EOF
+
+    cards = Vcard::Vcard.decode(src)
+    assert_equal 1, cards.size
+  end
+
+  def test_ignore_only_invalid_fields
+    Vcard::configuration.raise_on_invalid_line = false
+    Vcard::configuration.ignore_invalid_vcards = false
+    email = 'test@example.com'
+    cards = Vcard::Vcard.decode("BEGIN:VCARD\nVERSION:3.0\nKEYencoding=b:this could be \nmy certificate\nEMAIL:#{email}\n\nEND:VCARD\n")
+    assert_equal email, cards.first.email
+    # [BEGIN, VERSION, EMAIL, END].size == 4
+    assert_equal 4, cards.first.fields.size
   end
 
   def test_create
