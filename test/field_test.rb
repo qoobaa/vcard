@@ -21,31 +21,31 @@ class FieldTest < Test::Unit::TestCase
   def test_field4
     line = "t;e=a,b: 4 "
     part = Field.decode0(line)
-    assert_equal("4", part[ 3 ])
+    assert_equal("4", part[ 4 ])
   end
 
   def test_field3
     line = "t;e=a,b:4"
     part = Field.decode0(line)
-    assert_equal("4", part[ 3 ])
-    assert_equal( {"E" => [ "a","b" ] }, part[ 2 ])
+    assert_equal("4", part[ 4 ])
+    assert_equal( {"E" => [ "a","b" ] }, part[ 3 ])
   end
 
   def test_field2
     line = "tel;type=work,voice,msg:+1 313 747-4454"
     part = Field.decode0(line)
-    assert_equal("+1 313 747-4454", part[ 3 ])
-    assert_equal( {"TYPE" => [ "work","voice","msg" ] }, part[ 2 ])
+    assert_equal("+1 313 747-4454", part[ 4 ])
+    assert_equal( {"TYPE" => [ "work","voice","msg" ] }, part[ 3 ])
   end
 
   def test_field1
     line = 'ORGANIZER;CN="xxxx, xxxx [SC100:370:EXCH]":MAILTO:xxxx@americasm01.nt.com'
     parts = Field.decode0(line)
 
-    assert_equal(nil, parts[0])
-    assert_equal("ORGANIZER", parts[1])
-    assert_equal({ "CN" => [ "xxxx, xxxx [SC100:370:EXCH]" ] }, parts[2])
-    assert_equal("MAILTO:xxxx@americasm01.nt.com", parts[3])
+    assert_equal(nil, parts[1])
+    assert_equal("ORGANIZER", parts[2])
+    assert_equal({ "CN" => [ "xxxx, xxxx [SC100:370:EXCH]" ] }, parts[3])
+    assert_equal("MAILTO:xxxx@americasm01.nt.com", parts[4])
   end
 
 =begin this can not be done :-(
@@ -67,25 +67,36 @@ class FieldTest < Test::Unit::TestCase
 
   def test_field0
     assert_equal("name:", line = Field.encode0(nil, "name"))
-    assert_equal([ nil, "NAME", {}, ""], Field.decode0(line))
+    assert_equal([ true, nil, "NAME", {}, ""], Field.decode0(line))
 
     assert_equal("name:value", line = Field.encode0(nil, "name", {}, "value"))
-    assert_equal([ nil, "NAME", {}, "value"], Field.decode0(line))
+    assert_equal([ true, nil, "NAME", {}, "value"], Field.decode0(line))
 
     assert_equal("name;encoding=B:dmFsdWU=", line = Field.encode0(nil, "name", { "encoding"=>:b64 }, "value"))
-    assert_equal([ nil, "NAME", { "ENCODING"=>["B"]}, ["value"].pack("m").chomp ], Field.decode0(line))
+    assert_equal([ true, nil, "NAME", { "ENCODING"=>["B"]}, ["value"].pack("m").chomp ], Field.decode0(line))
 
     line = Field.encode0("group", "name", {}, "value")
     assert_equal "group.name:value", line
-    assert_equal [ "GROUP", "NAME", {}, "value"], Field.decode0(line)
+    assert_equal [ true, "GROUP", "NAME", {}, "value"], Field.decode0(line)
   end
 
-  def test_invalid_fields
+  def test_invalid_fields_wih_raise_error
+    Vcard::configuration.raise_on_invalid_line = true
     [
       "g.:",
       ":v",
     ].each do |line|
       assert_raises(::Vcard::InvalidEncodingError) { Field.decode0(line) }
+    end
+  end
+
+  def test_invalid_fields_wihout_raise_error
+    Vcard.configuration.raise_on_invalid_line = false
+    [
+        "g.:",
+        ":v",
+    ].each do |line|
+      assert_nothing_raised { Field.decode0(line) }
     end
   end
 
@@ -96,6 +107,7 @@ class FieldTest < Test::Unit::TestCase
 
   def test_field_modify
     f = Field.create("name")
+
 
     assert_equal("", f.value)
     f.value = ""
