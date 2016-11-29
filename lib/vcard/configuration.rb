@@ -8,8 +8,18 @@ module Vcard
     alias_method :ignore_invalid_vcards?, :ignore_invalid_vcards
 
     def initialize
-      @raise_on_invalid = true
-      @ignore_invalid_vcard = true
+      set_default_values
+    end
+
+    def reset
+      set_default_values
+    end
+
+    private
+
+    def set_default_values
+      @raise_on_invalid_line = true
+      @ignore_invalid_vcards = true
     end
 
   end
