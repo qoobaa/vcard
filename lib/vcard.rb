@@ -287,11 +287,11 @@ module Vcard
     return outer, inner
   end
 
-  def configuration
+  def self.configuration
     @configuration ||= Configuration.new
   end
 
-  def configure
+  def self.configure
     yield configuration
   end
 
