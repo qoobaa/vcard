@@ -356,7 +356,7 @@ EOF
     assert_equal('', card.name.given)
     assert_equal('', card.name.fullname)
 
-    assert_raises(TypeError, RuntimeError) do
+    assert_raises(TypeError, RuntimeError, FrozenError) do
       card.name.given = 'given'
     end
 
