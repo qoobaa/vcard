@@ -92,10 +92,11 @@ module Vcard
 
       if profile
         p = profile.to_str
-        f = [ Field.create("BEGIN", p) ]
-        f.concat fields
-        f.push Field.create("END", p)
-        fields = f
+        fields = [
+          Field.create("BEGIN", p),
+          *fields,
+          Field.create("END", p)
+        ]
       end
 
       new(fields, profile)
