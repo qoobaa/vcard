@@ -162,8 +162,11 @@ class FieldTest < Test::Unit::TestCase
     assert_equal("0:xx\n",            Vcard::DirectoryInfo::Field.create("0", "x" * 2).encode(4))
     assert_equal("0:xx\n x\n",        Vcard::DirectoryInfo::Field.create("0", "x" * 3).encode(4))
     assert_equal("0:xx\n xx\n",       Vcard::DirectoryInfo::Field.create("0", "x" * 4).encode(4))
-    assert_equal("0:xx\n xxxx\n",     Vcard::DirectoryInfo::Field.create("0", "x" * 6).encode(4))
-    assert_equal("0:xx\n xxxx\n x\n", Vcard::DirectoryInfo::Field.create("0", "x" * 7).encode(4))
+    assert_equal("0:xx\n xxx\n x\n",  Vcard::DirectoryInfo::Field.create("0", "x" * 6).encode(4))
+    assert_equal("0:xx\n xxx\n xx\n", Vcard::DirectoryInfo::Field.create("0", "x" * 7).encode(4))
+    assert_equal("0:xxxxxxx\n",       Vcard::DirectoryInfo::Field.create("0", "x" * 7).encode(0))
+    assert_equal("0:xxxxxxx\n",       Vcard::DirectoryInfo::Field.create("0", "x" * 7).encode())
+    assert_equal("0:#{"x" * 73}\n #{"x" * 74}\n #{"x" * 53}\n", Vcard::DirectoryInfo::Field.create("0", "x" * 200).encode())
   end
 end
 
