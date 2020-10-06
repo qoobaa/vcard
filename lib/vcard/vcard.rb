@@ -608,9 +608,8 @@ module Vcard
 
     # Create a vCard 3.0 object with the minimum required fields, plus any
     # +fields+ you want in the card (they can also be added later).
-    def self.create(fields = [] )
-      fields.unshift Field.create("VERSION", "3.0")
-      super(fields, "VCARD")
+    def self.create(fields = [])
+      super([Field.create("VERSION", "3.0"), *fields], "VCARD")
     end
 
     # Decode a collection of vCards into an array of Vcard objects.

@@ -218,6 +218,12 @@ EOF
     key = Vcard::DirectoryInfo.decode("key;type=x509;encoding=B:dGhpcyBjb3VsZCBiZSAKbXkgY2VydGlmaWNhdGUK\n")['key']
     card << Vcard::DirectoryInfo::Field.create('key', key, 'encoding' => :b64)
     assert_equal(key, card['key'])
+
+    field = Vcard::DirectoryInfo::Field.create('key', 'value')
+    card = assert_nothing_raised {
+      Vcard::Vcard.create([field].freeze)
+    }
+    assert_equal('value', card['key'])
   end
 
   def test_decode_date
