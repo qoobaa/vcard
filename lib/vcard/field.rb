@@ -228,9 +228,10 @@ module Vcard
         Marshal.load(Marshal.dump(self))
       end
 
-      # The String encoding of the Field. The String will be wrapped to a
-      # maximum line width of +width+, where +0+ means no wrapping, and nil is
-      # to accept the default wrapping (75, recommended by RFC2425).
+      # The String encoding of the Field. The String will be wrapped
+      # to a maximum line width of +width+, where +0+ means no
+      # wrapping, and omitting it is to accept the default wrapping
+      # (75, recommended by RFC2425).
       #
       # Note: AddressBook.app 3.0.3 neither understands to unwrap lines when it
       # imports vCards (it treats them as raw new-line characters), nor wraps
@@ -240,13 +241,15 @@ module Vcard
       # FIXME - breaks round-trip encoding, need to change this to not wrap
       # fields that are already wrapped.
       def encode(width=75)
-        l = @line
-        # Wrap to width, unless width is zero.
-        if width > 0
-          l = l.gsub(/.{#{width},#{width}}/) { |m| m + "\n " }
+        l = @line.rstrip
+        if width.zero?
+          l + "\n"
+        elsif width <= 1
+          raise ArgumentError, "#{width} is too narrow"
+        else
+          # Wrap to width
+          l.scan(/\A.{,#{width}}|.{1,#{width - 1}}/).join("\n ") + "\n"
         end
-        # Make sure it's terminated with no more than a single NL.
-        l.gsub(/\s*\z/, "") + "\n"
       end
 
       alias to_s encode
