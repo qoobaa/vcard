@@ -244,9 +244,9 @@ module Vcard
 
     # The string encoding of the DirectoryInfo. See Field#encode for information
     # about the width parameter.
-    def encode(width=nil)
+    def encode(width=75)
       unless @string
-        @string = @fields.collect { |f| f.encode(width) } . join ""
+        @string = @fields.collect { |f| f.encode(width) }.join ""
       end
       @string
     end
@@ -261,10 +261,10 @@ module Vcard
         raise "No fields to check"
       end
       unless @fields.first.name? "BEGIN"
-        raise "Needs BEGIN, found: #{@fields.first.encode nil}"
+        raise "Needs BEGIN, found: #{@fields.first.encode}"
       end
       unless @fields.last.name? "END"
-        raise "Needs END, found: #{@fields.last.encode nil}"
+        raise "Needs END, found: #{@fields.last.encode}"
       end
       unless @fields.last.value? @fields.first.value
         raise "BEGIN/END mismatch: (#{@fields.first.value} != #{@fields.last.value}"
