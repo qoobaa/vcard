@@ -239,8 +239,7 @@ module Vcard
       #
       # FIXME - breaks round-trip encoding, need to change this to not wrap
       # fields that are already wrapped.
-      def encode(width=nil)
-        width = 75 unless width
+      def encode(width=75)
         l = @line
         # Wrap to width, unless width is zero.
         if width > 0
