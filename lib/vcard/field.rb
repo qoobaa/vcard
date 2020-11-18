@@ -228,10 +228,18 @@ module Vcard
         Marshal.load(Marshal.dump(self))
       end
 
+      LF = "\n"
+
       # The String encoding of the Field. The String will be wrapped
       # to a maximum line width of +width+, where +0+ means no
       # wrapping, and omitting it is to accept the default wrapping
       # (75, recommended by RFC2425).
+      #
+      # The +nl+ parameter specifies the line delimiter, which is
+      # defaulted to LF ("\n") for historical reasons.  Relevant RFC's
+      # all say it should be CRLF, so it is highly recommended that
+      # you specify "\r\n" if you care about maximizing
+      # interoperability and interchangeability.
       #
       # Note: AddressBook.app 3.0.3 neither understands to unwrap lines when it
       # imports vCards (it treats them as raw new-line characters), nor wraps
@@ -240,15 +248,15 @@ module Vcard
       #
       # FIXME - breaks round-trip encoding, need to change this to not wrap
       # fields that are already wrapped.
-      def encode(width=75)
+      def encode(width = 75, nl: LF)
         l = @line.rstrip
         if width.zero?
-          l + "\n"
+          l + nl
         elsif width <= 1
           raise ArgumentError, "#{width} is too narrow"
         else
           # Wrap to width
-          l.scan(/\A.{,#{width}}|.{1,#{width - 1}}/).join("\n ") + "\n"
+          l.scan(/\A.{,#{width}}|.{1,#{width - 1}}/).join("#{nl} ") + nl
         end
       end
 
