@@ -168,5 +168,8 @@ class FieldTest < Test::Unit::TestCase
     assert_equal("0:xxxxxxx\n",       Vcard::DirectoryInfo::Field.create("0", "x" * 7).encode())
     assert_equal("0:#{"x" * 73}\n #{"x" * 74}\n #{"x" * 53}\n", Vcard::DirectoryInfo::Field.create("0", "x" * 200).encode())
   end
-end
 
+  def test_nl
+    assert_equal("test:#{"value" * 14}\r\n #{"value" * 6}\r\n", Vcard::DirectoryInfo::Field.create("test", "value" * 20).encode(nl: "\r\n"))
+  end
+end

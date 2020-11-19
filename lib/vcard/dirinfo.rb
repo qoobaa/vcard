@@ -193,9 +193,8 @@ module Vcard
       Enumerator.new(self, cond )
     end
 
-    # Force card to be reencoded from the fields.
+    # Obsoleted; force card to be reencoded from the fields.
     def dirty #:nodoc:
-      #string = nil
     end
 
     # Append +field+ to the fields. Note that it won't be literally appended
@@ -242,13 +241,12 @@ module Vcard
       self
     end
 
+    LF= "\n"
+
     # The string encoding of the DirectoryInfo. See Field#encode for information
-    # about the width parameter.
-    def encode(width=75)
-      unless @string
-        @string = @fields.collect { |f| f.encode(width) }.join ""
-      end
-      @string
+    # about the parameters.
+    def encode(width = 75, nl: LF)
+      @fields.collect { |f| f.encode(width, nl: nl) }.join
     end
 
     alias to_s encode

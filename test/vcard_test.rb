@@ -97,6 +97,20 @@ class VcardTest < Test::Unit::TestCase
     assert_equal("CATEGORIES: Amis/Famille", card[ "note" ])
   end
 
+  def test_nl
+    lf_card = crlf_card = nil
+    assert_nothing_thrown {
+      lf_card = Vcard::Vcard.decode(vcard(:ex3)).first
+      crlf_encoded = lf_card.encode(nl: "\r\n")
+      lf_encoded = lf_card.encode
+      assert_equal(crlf_encoded.split(/\r\n/), lf_encoded.split(/\n/))
+      crlf_card = Vcard::Vcard.decode(crlf_encoded).first
+    }
+
+    assert_equal(lf_card["note"], crlf_card["note"])
+    assert_equal(lf_card["home.label"], crlf_card["home.label"])
+  end
+
   def test_nickname
     assert_equal(nil,          Vcard::Vcard.decode(vcard(:nickname0)).first.nickname)
     assert_equal(nil,          Vcard::Vcard.decode(vcard(:nickname1)).first.nickname)
