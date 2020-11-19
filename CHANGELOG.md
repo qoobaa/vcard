@@ -2,7 +2,9 @@
 
 ## [Unreleased](https://github.com/qoobaa/vcard/tree/HEAD)
 
-[Full Changelog](https://github.com/qoobaa/vcard/compare/v0.2.16...HEAD)
+[Full Changelog](https://github.com/qoobaa/vcard/compare/v0.3.0...HEAD)
+
+## [v0.3.0](https://github.com/qoobaa/vcard/tree/v0.3.0) (2020-11-20)
 
 **Closed issues:**
 
