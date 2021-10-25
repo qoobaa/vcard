@@ -1,4 +1,4 @@
-# Vcard [![Build Status](https://travis-ci.org/qoobaa/vcard.svg?branch=master)](https://travis-ci.org/qoobaa/vcard)
+# Vcard [![CI](https://github.com/qoobaa/vcard/actions/workflows/ci.yml/badge.svg)](https://github.com/qoobaa/vcard/actions/workflows/ci.yml)
 
 Vcard gem extracts Vcard support from Vpim gem.
 
